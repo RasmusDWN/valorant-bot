@@ -1,6 +1,8 @@
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import fetch from 'node-fetch';
 
+import { getTierName } from '../utils/tiers.js';
+
 export default {
     data: new SlashCommandBuilder()
         .setName('skin')
@@ -56,15 +58,3 @@ export default {
         }
     }
 };
-
-function getTierName(uuid) {
-    const tiers = {
-        "0cebb560-4835-8428-35a1-e0c70a5c8d01": "Select",
-        "60bca009-4182-7998-dee7-b8a2558dc369": "Deluxe",
-        "e046854e-406c-37f4-6607-19a9ba8426fc": "Premium",
-        "f7bcabf7-41d5-06ad-5904-8cde42372a1f": "Exclusive",
-        "3f296c07-64c3-494c-923b-fe692a4fa1bd": "Ultra"
-    };
-
-    return tiers[uuid] || "Unknown";
-}
