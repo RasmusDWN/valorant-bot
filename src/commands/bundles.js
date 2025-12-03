@@ -30,14 +30,37 @@ export default {
                 pageItems.forEach(bundle => {
                     embed.addFields({
                         name: bundle.displayName,
-                        value: `[View Bundle](${bundle.displayIcon})`,
+                        value: '',
                     });
                 });
+
+                embed.addFields({
+                    name: '',
+                    value: 'Click the buttons below to view a specific bundle.',
+                })
 
                 return embed;
             };
 
-            const buttons = (pageIndex) => new ActionRowBuilder().addComponents(
+            const generateButtons = (pageIndex) => {
+                const start = pageIndex * BUNDLES_PER_PAGE;
+                const pageItems = bundles.slice(start, start + BUNDLES_PER_PAGE);
+
+                const row = new ActionRowBuilder();
+
+                pageItems.forEach((bundle) => {
+                    row.addComponents(
+                        new ButtonBuilder()
+                            .setCustomId(`bundle_${bundle.uuid}`)
+                            .setLabel(bundle.displayName.substring(0, 20))
+                            .setStyle(ButtonStyle.Secondary)
+                    );
+                });
+
+                return row;
+            }
+
+            const navButtons = (pageIndex) => new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
                     .setCustomId('prevBundles')
                     .setLabel('⬅️ Previous')
@@ -53,7 +76,7 @@ export default {
 
             const message = await interaction.editReply({
                 embeds: [generateEmbed(page)],
-                components: [buttons(page)],
+                components: [generateButtons(page), navButtons(page)],
             });
 
             const collector = message.createMessageComponentCollector({ time: 60000 });
@@ -64,9 +87,21 @@ export default {
                 if (i.customId === 'prevBundles') page--;
                 if (i.customId === 'nextBundles') page++;
 
+                if (i.customId.startsWith('bundle_')) {
+                    const uuid = i.customId.replace('bundle_', '');
+                    const bundle = bundles.find(b => b.uuid === uuid);
+
+                    const embed = new EmbedBuilder()
+                        .setTitle(bundle.displayName)
+                        .setColor('#ff4656')
+                        .setImage(bundle.displayIcon)
+
+                    return i.update({ embeds: [embed], components: [] });
+                }
+
                 await i.update({
                     embeds: [generateEmbed(page)],
-                    components: [buttons(page)],
+                    components: [generateButtons(page), navButtons(page)],
                 });
             });
 
