@@ -24,7 +24,7 @@ export default {
                 const pageItems = bundles.slice(start, start + BUNDLES_PER_PAGE);
 
                 const embed = new EmbedBuilder()
-                    .setTitle('Valorant Bundles (Page ' + (pageIndex + 1) + '/' + totalPages + ')')
+                    .setTitle(`Valorant Bundles (Page ${pageIndex + 1}/${totalPages})`)
                     .setColor('#ff4656');
 
                 pageItems.forEach(bundle => {
