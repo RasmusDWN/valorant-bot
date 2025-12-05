@@ -22,13 +22,13 @@ export default {
 
         try {
             const skin = await fetchSkinByName(skinName);
-            const weapon = await fetchWeaponFromSkin(skin);
 
             if (!skin) {
                 await interaction.editReply(`Skin "${skinName}" not found. Please check the name and try again.`);
                 return;
             }
 
+            const weapon = await fetchWeaponFromSkin(skin);
             const weaponName = weapon.displayName;
             const chromas = skin.chromas?.length || 0;
 
@@ -39,7 +39,7 @@ export default {
             const price = getTierPrice(skin.contentTierUuid);
 
             const embed = new EmbedBuilder()
-                .setTitle(skin.displayName)
+                .setTitle(weaponName)
                 .setColor('#ff4655')
                 .setThumbnail(weapon?.displayIcon || null)
                 .addFields(
