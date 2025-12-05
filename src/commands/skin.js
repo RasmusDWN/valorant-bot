@@ -3,6 +3,7 @@ import { fetchWeaponFromSkin } from '../utils/weapons.js';
 import fetch from 'node-fetch';
 
 import { getTierName } from '../utils/tiers.js';
+import { fetchSkinByName } from '../utils/fetch_skin.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -20,14 +21,7 @@ export default {
         const skinName = interaction.options.getString('name').toLowerCase();
 
         try {
-            const response = await fetch('https://valorant-api.com/v1/weapons/skins');
-
-            const data = await response.json();
-
-            const skin = data.data.find(skin =>
-                skin.displayName.toLowerCase() === skinName
-            );
-
+            const skin = await fetchSkinByName(skinName);
             const weapon = await fetchWeaponFromSkin(skin);
 
             if (!skin) {
