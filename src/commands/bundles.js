@@ -94,7 +94,7 @@ export default {
                     const embed = new EmbedBuilder()
                         .setTitle(bundle.displayName)
                         .setColor('#ff4656')
-                        .setImage(bundle.displayIcon)
+                        .setImage(bundle.displayIcon);
 
                     return i.update({ embeds: [embed], components: [] });
                 }
