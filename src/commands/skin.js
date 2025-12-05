@@ -1,5 +1,4 @@
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
-import fetch from 'node-fetch';
 
 import { fetchSkinByName } from '../utils/fetch_skin.js';
 import { fetchWeaponFromSkin } from '../utils/weapons.js';
