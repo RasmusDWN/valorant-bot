@@ -15,9 +15,13 @@ const tierEmotes = {
 };
 
 // Fetches names of skin tiers based on their UUIDs.
-export function getTierName(uuid) {
+export function getTier(uuid) {
     const name = tierNames[uuid] || 'Unknown';
     const emote = name !== 'Unknown' ? (tierEmotes[name] || '') : '';
 
     return `${name} ${emote}`.trim();
+}
+
+export function getTierName(uuid) {
+    return tierNames[uuid] || 'Unknown';
 }
