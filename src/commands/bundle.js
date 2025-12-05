@@ -38,7 +38,7 @@ export default {
 
         } catch (error) {
             console.error(error);
-            interaction.editReply('An error occurred while fetching bundle data. Please try again later.');
+            await interaction.editReply('An error occurred while fetching bundle data. Please try again later.');
         }
     }
 };
