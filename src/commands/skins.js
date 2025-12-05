@@ -83,9 +83,9 @@ export default {
 
                 // Second row -> Skin selection buttons
                 const second_row = new ActionRowBuilder().addComponents(
-                    ...skinsSlice.map(skin =>
+                    ...skinsSlice.map((skin, index) =>
                         new ButtonBuilder()
-                            .setCustomId(`skin_${skin.displayName.replaceAll(" ", "_")}`)
+                            .setCustomId(`skin_${index}`)
                             .setLabel(skin.displayName)
                             .setStyle(ButtonStyle.Secondary)
                     )
