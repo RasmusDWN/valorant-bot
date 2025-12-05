@@ -1,4 +1,5 @@
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import { fetchWeaponFromSkin } from '../utils/weapons.js';
 import fetch from 'node-fetch';
 
 import { getTierName } from '../utils/tiers.js';
@@ -27,6 +28,8 @@ export default {
                 skin.displayName.toLowerCase() === skinName
             );
 
+            const weapon = await fetchWeaponFromSkin(skin);
+
             if (!skin) {
                 await interaction.editReply(`Skin "${skinName}" not found. Please check the name and try again.`);
                 return;
@@ -43,6 +46,7 @@ export default {
             const embed = new EmbedBuilder()
                 .setTitle(skin.displayName)
                 .setColor('#ff4655')
+                .setThumbnail(weapon?.displayIcon || null)
                 .addFields(
                     { name: 'Weapon', value: weaponName, inline: true },
                     { name: 'Tier', value: tier, inline: true },
