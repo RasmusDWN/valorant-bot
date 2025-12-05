@@ -1,7 +1,9 @@
 import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import fetch from 'node-fetch';
 
-import { getTierName } from '../utils/tiers.js';
+import { fetchSkinByName } from '../utils/fetch_skin.js';
+import { fetchWeaponFromSkin } from '../utils/weapons.js';
+import { getTierName, getTierPrice } from '../utils/tiers.js';
 
 const SKINS_PER_PAGE = 5;
 
@@ -52,7 +54,7 @@ export default {
                 skinsSlice.forEach(skin => {
                     embed.addFields({
                         name: skin.displayName,
-                        value: `Tier: ${skin.contentTierUuid ? getTierName(skin.contentTierUuid) : 'Unknown'}\n[View Skin](${skin.displayIcon})`,
+                        value: `Tier: ${skin.contentTierUuid ? getTierName(skin.contentTierUuid) : 'Unknown'}`
                     })
                 });
 
@@ -60,23 +62,41 @@ export default {
             };
 
             const generateButtons = (page) => {
-                return new ActionRowBuilder().addComponents(
+                const start = page * SKINS_PER_PAGE;
+                const end = start + SKINS_PER_PAGE;
+                const skinsSlice = weapon.skins.slice(start, end);
+
+                // First row -> Pagination buttons
+                const first_row = new ActionRowBuilder().addComponents(
                     new ButtonBuilder()
                         .setCustomId('prev')
                         .setLabel('⬅️ Previous')
                         .setStyle(ButtonStyle.Primary)
                         .setDisabled(page === 0),
+
                     new ButtonBuilder()
                         .setCustomId('next')
                         .setLabel('Next ➡️')
                         .setStyle(ButtonStyle.Primary)
-                        .setDisabled(page === totalPages - 1)
+                        .setDisabled(page === totalPages - 1),
                 );
+
+                // Second row -> Skin selection buttons
+                const second_row = new ActionRowBuilder().addComponents(
+                    ...skinsSlice.map((skin, index) =>
+                        new ButtonBuilder()
+                            .setCustomId(`skin_${index}`)
+                            .setLabel(skin.displayName)
+                            .setStyle(ButtonStyle.Secondary)
+                    )
+                );
+
+                return [first_row, second_row];
             };
 
             const message = await interaction.editReply({
                 embeds: [generateEmbed(currentPage)],
-                components: [generateButtons(currentPage)]
+                components: generateButtons(currentPage)
             });
 
             const collector = message.createMessageComponentCollector({ time: 60000 });
@@ -87,9 +107,30 @@ export default {
                 if (i.customId === 'prev') currentPage--;
                 if (i.customId === 'next') currentPage++;
 
+                if (i.customId.startsWith('skin_')) {
+                    const skinName = i.customId.replace('skin_', '').replaceAll("_", " ");
+                    const skin = await fetchSkinByName(skinName);
+                    const weapon = await fetchWeaponFromSkin(skin);
+
+                    return i.reply({
+                        embeds: [
+                            new EmbedBuilder()
+                                .setTitle(skin.displayName)
+                                .setColor('#ff4655')
+                                .setThumbnail(weapon?.displayIcon || null)
+                                .addFields(
+                                    { name: 'Price', value: getTierPrice(skin.contentTierUuid), inline: true },
+                                    { name: 'Tier', value: getTierName(skin.contentTierUuid), inline: true },
+                                    { name: 'Chromas', value: (skin.chromas?.length || 0).toString(), inline: true }
+                                )
+                                .setImage(skin.fullRender || skin.displayIcon || null)
+                        ]
+                    });
+                }
+
                 await i.update({
                     embeds: [generateEmbed(currentPage)],
-                    components: [generateButtons(currentPage)]
+                    components: generateButtons(currentPage)
                 });
             });
     } catch (error) {
