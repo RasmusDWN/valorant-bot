@@ -1,9 +1,9 @@
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
-import { fetchWeaponFromSkin } from '../utils/weapons.js';
 import fetch from 'node-fetch';
 
-import { getTierName } from '../utils/tiers.js';
 import { fetchSkinByName } from '../utils/fetch_skin.js';
+import { fetchWeaponFromSkin } from '../utils/weapons.js';
+import { getTierName, getTierPrice } from '../utils/tiers.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -29,22 +29,22 @@ export default {
                 return;
             }
 
-            const weaponName = skin.weaponSkinType || 'Unknown';
-            const levels = skin.levels?.length || 0;
+            const weaponName = weapon.displayName;
             const chromas = skin.chromas?.length || 0;
 
             const tier = skin.contentTierUuid
                 ? getTierName(skin.contentTierUuid)
                 : 'Unknown';
 
+            const price = getTierPrice(skin.contentTierUuid);
+
             const embed = new EmbedBuilder()
                 .setTitle(skin.displayName)
                 .setColor('#ff4655')
                 .setThumbnail(weapon?.displayIcon || null)
                 .addFields(
-                    { name: 'Weapon', value: weaponName, inline: true },
+                    { name: 'Price', value: price, inline: true },
                     { name: 'Tier', value: tier, inline: true },
-                    { name: 'Levels', value: levels.toString(), inline: true },
                     { name: 'Chromas', value: chromas.toString(), inline: true }
                 )
                 .setImage(skin.fullRender || skin.displayIcon || null);

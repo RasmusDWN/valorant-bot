@@ -3,7 +3,7 @@ import fetch from 'node-fetch';
 
 import { fetchSkinByName } from '../utils/fetch_skin.js';
 import { fetchWeaponFromSkin } from '../utils/weapons.js';
-import { getTierName } from '../utils/tiers.js';
+import { getTierName, getTierPrice } from '../utils/tiers.js';
 
 const SKINS_PER_PAGE = 5;
 
@@ -119,9 +119,8 @@ export default {
                                 .setColor('#ff4655')
                                 .setThumbnail(weapon?.displayIcon || null)
                                 .addFields(
-                                    { name: 'Weapon', value: weapon.displayName, inline: true },
-                                    { name: 'Tier', value: skin.contentTierUuid ? getTierName(skin.contentTierUuid) : 'Unknown', inline: true },
-                                    { name: 'Levels', value: (skin.levels?.length || 0).toString(), inline: true },
+                                    { name: 'Price', value: getTierPrice(skin.contentTierUuid), inline: true },
+                                    { name: 'Tier', value: getTierName(skin.contentTierUuid), inline: true },
                                     { name: 'Chromas', value: (skin.chromas?.length || 0).toString(), inline: true }
                                 )
                                 .setImage(skin.fullRender || skin.displayIcon || null)

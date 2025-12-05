@@ -14,6 +14,14 @@ const tierEmotes = {
     "Ultra": "<:UltraTier:IDHERE>"
 };
 
+const tierPrices = {
+    "Select" : "875 VP",
+    "Deluxe" : "1275 VP",
+    "Premium" : "1775 VP",
+    "Exclusive" : "Varies",
+    "Ultra" : "Varies"
+};
+
 // Fetches names of skin tiers based on their UUIDs.
 export function getTier(uuid) {
     const name = tierNames[uuid] || 'Unknown';
@@ -24,4 +32,9 @@ export function getTier(uuid) {
 
 export function getTierName(uuid) {
     return tierNames[uuid] || 'Unknown';
+}
+
+export function getTierPrice(uuid) {
+    const name = tierNames[uuid];
+    return name ? tierPrices[name] : 'Unknown';
 }
