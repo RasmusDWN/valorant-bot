@@ -105,6 +105,10 @@ export default {
                 });
             });
 
+            collector.on('end', () => {
+                interaction.editReply({ components: [] });
+            });
+
         } catch (error) {
             console.error('Error fetching bundles:', error);
             await interaction.editReply('There was an error fetching the bundles. Please try again later.');
