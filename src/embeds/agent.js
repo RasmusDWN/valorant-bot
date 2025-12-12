@@ -24,7 +24,7 @@ export function createAgentEmbed(agent) {
 }
 
 export function createAbilityEmbed(ability, agentName) {
-     return new EmbedBuilder()
+    return new EmbedBuilder()
         .setTitle(`${ability.displayName} - ${agentName}`)
         .setColor('#ff4655')
         .setImage(ability.displayIcon)
