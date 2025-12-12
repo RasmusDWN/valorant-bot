@@ -1,6 +1,8 @@
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import fetch from 'node-fetch';
 
+import { createAbilityEmbed, createAgentEmbed } from '../embeds/agent.js';
+
 // /agent #{agent-name}
 //
 // Fetches and displays information about a specific Valorant agent.
@@ -32,30 +34,24 @@ export default {
                 return;
             }
 
-            const embed = new EmbedBuilder()
-                .setTitle(agent.displayName)
-                .setImage(agent.fullPortrait || agent.displayIcon)
-                .setColor('#ff4655')
-                .setDescription(agent.description);
+            const { embed, buttons } = createAgentEmbed(agent);
 
-            // Add abilities
-            agent.abilities.forEach(ability => {
-                if (ability.displayName) {
-                    embed.addFields({
-                        name: ability.displayName,
-                        value: ability.description,
-                        inline: true
-                    });
+            const message = await interaction.editReply({ embeds: [embed], components: [buttons] });
+
+            // Collector to handle button interactions
+            const collector = message.createMessageComponentCollector({ time: 60000 });
+
+            collector.on('collect', async i => {
+                if (i.customId.startsWith('ability_')) {
+                    const index = parseInt(i.customId.replace('ability_', ''));
+                    const ability = agent.abilities[index];
+
+                    const abilityEmbed = createAbilityEmbed(ability, agent.displayName);
+
+                    await i.reply({ embeds: [abilityEmbed], ephemeral: true });
                 }
             });
 
-            // Add allvalorant.gg link
-            embed.addFields({
-                name: 'More Info',
-                value: `View on allvalorant.gg => https://allvalorant.gg/`
-            });
-
-            await interaction.editReply({ embeds: [embed] });
         } catch (error) {
             console.error(error);
             await interaction.editReply('Sorry, the agents must be sleeping... Please try again later.');
