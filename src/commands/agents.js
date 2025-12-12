@@ -1,4 +1,4 @@
-import { ActionRow, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import fetch from 'node-fetch';
 
 import { createAgentEmbed, createAbilityEmbed } from '../embeds/agent.js';
@@ -96,7 +96,7 @@ export default {
                     const agentIndex = parseInt(i.customId.split('_')[1]);
                     const agent = agentList[agentIndex];
 
-                    const { embed, buttons } = createAgentEmbed(agent);
+                    const { embed } = createAgentEmbed(agent);
 
                     // Update original message with agent details
                     return i.update({
@@ -104,6 +104,7 @@ export default {
                         components: [
                             new ActionRowBuilder().addComponents(
                                 ...agent.abilities
+                                    .filter(ability => ability.displayName)
                                     .map((ability, index) =>
                                         new ButtonBuilder()
                                             .setCustomId(`ability_${agentIndex}_${index}`)
