@@ -25,15 +25,35 @@ for (const file of commandFiles) {
     commands.push(command.data.toJSON());
 }
 
-// Register commands with Discord API
-const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
+// Register environment and REST client
+const isDev = process.env.NODE_ENV === 'development';
+
+// Determine the correct token based on environment
+const token = isDev ? process.env.DEV_DISCORD_TOKEN : process.env.DISCORD_TOKEN;
+if (!token) {
+    const exptectedVar = isDev ? 'DEV_DISCORD_TOKEN' : 'DISCORD_TOKEN';
+    console.log(`Discord bot token is not set. Please set the ${exptectedVar} environment variable.`);
+    process.exit(1);
+}
+
+const rest = new REST({ version: '10' }).setToken(token);
+
+const clientId = isDev ? process.env.DEV_CLIENT_ID : process.env.CLIENT_ID;
+if (!clientId) {
+    console.error('Missing required environment variable: ' + (isDev ? 'DEV_CLIENT_ID' : 'CLIENT_ID'));
+    process.exit(1);
+}
+
+const route = isDev
+    ? Routes.applicationGuildCommands(clientId, process.env.GUILD_ID)
+    : Routes.applicationCommands(clientId);
 
 // Deploy commands to a specific guild
 (async () => {
     try {
-        console.log('Started refreshin application (/) commands.');
+        console.log('Started refreshing application (/) commands.');
         await rest.put(
-            Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
+            route,
             { body: commands },
         );
         console.log('Successfully reloaded application (/) commands.');
@@ -61,4 +81,4 @@ client.once('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
 });
 
-client.login(process.env.DISCORD_TOKEN);
+client.login(token);
