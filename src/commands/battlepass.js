@@ -139,7 +139,7 @@ async function buildBattlepassEmbed(contract, chapterIndex, levelIndex) {
         const reward = await fetchReward(lvl.reward?.type, lvl.reward?.uuid);
 
         embed.addFields({
-            name: `Level ${start + 1} - ${reward.name}`,
+            name: `Level ${start + levels.indexOf(lvl) + 1} - ${reward.name}`,
             value: `XP Required: ${lvl.xp ?? 0}`
         });
 
