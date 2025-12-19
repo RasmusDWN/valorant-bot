@@ -8,7 +8,7 @@ export function createBundleButtons(skinsInBundle) {
                 ...skinsInBundle.slice(i, i + 5).map(skin =>
                     new ButtonBuilder()
                         .setCustomId(`skin_${skin.displayName.replaceAll(" ", "_")}`)
-                        .setLabel(skin.displayName.substring(0, 20))
+                        .setLabel(skin.displayName.substring(0, 80))
                         .setStyle(ButtonStyle.Primary)
                 )
             )
