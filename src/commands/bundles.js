@@ -82,8 +82,6 @@ export default {
             const collector = message.createMessageComponentCollector({ time: 60000 });
 
             collector.on('collect', async i => {
-                if (i.user.id !== interaction.user.id) { return i.reply({ content: 'These buttons aren\'t for you!', ephemeral: true }); }
-
                 if (i.customId === 'prevBundles') page--;
                 if (i.customId === 'nextBundles') page++;
 
