@@ -132,7 +132,7 @@ async function buildBattlepassEmbed(contract, chapterIndex, levelIndex) {
         .setColor('#ff4655')
         .setThumbnail(contract.displayIcon ?? null)
         .setFooter({
-            text: `Chapter ${chapterIndex + 1}/${totalChapters} * Page ${levelIndex + 1}/${Math.ceil(chapter.levels.length / LEVELS_PER_PAGE)}`,
+            text: `Chapter ${chapterIndex + 1}/${totalChapters} • Page ${levelIndex + 1}/${Math.ceil(chapter.levels.length / LEVELS_PER_PAGE)}`,
         });
 
     for (const lvl of levels) {
