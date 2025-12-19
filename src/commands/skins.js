@@ -2,8 +2,9 @@ import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, But
 import fetch from 'node-fetch';
 
 import { fetchSkinByName } from '../utils/fetch_skin.js';
-import { fetchWeaponFromSkin } from '../utils/weapons.js';
-import { getTierName, getTierPrice } from '../utils/tiers.js';
+import { getTierName } from '../utils/tiers.js';
+
+import { createSkinEmbed } from '../embeds/skin.js';
 
 const SKINS_PER_PAGE = 5;
 
@@ -83,9 +84,9 @@ export default {
 
                 // Second row -> Skin selection buttons
                 const second_row = new ActionRowBuilder().addComponents(
-                    ...skinsSlice.map((skin, index) =>
+                    ...skinsSlice.map((skin) =>
                         new ButtonBuilder()
-                            .setCustomId(`skin_${index}`)
+                            .setCustomId(`skin_${skin.displayName.replaceAll(" ", "_")}`)
                             .setLabel(skin.displayName)
                             .setStyle(ButtonStyle.Secondary)
                     )
@@ -108,24 +109,11 @@ export default {
                 if (i.customId === 'next') currentPage++;
 
                 if (i.customId.startsWith('skin_')) {
-                    const skinName = i.customId.replace('skin_', '').replaceAll("_", " ");
+                    const skinName = i.customId.replace("skin_", "").replaceAll("_", " ").toLowerCase();
                     const skin = await fetchSkinByName(skinName);
-                    const weapon = await fetchWeaponFromSkin(skin);
+                    const embed = await createSkinEmbed(skin);
 
-                    return i.reply({
-                        embeds: [
-                            new EmbedBuilder()
-                                .setTitle(skin.displayName)
-                                .setColor('#ff4655')
-                                .setThumbnail(weapon?.displayIcon || null)
-                                .addFields(
-                                    { name: 'Price', value: getTierPrice(skin.contentTierUuid), inline: true },
-                                    { name: 'Tier', value: getTierName(skin.contentTierUuid), inline: true },
-                                    { name: 'Chromas', value: (skin.chromas?.length || 0).toString(), inline: true }
-                                )
-                                .setImage(skin.fullRender || skin.displayIcon || null)
-                        ]
-                    });
+                    return i.reply({embeds: [embed]});
                 }
 
                 await i.update({
