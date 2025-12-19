@@ -47,6 +47,13 @@ if (!clientId) {
     process.exit(1);
 }
 
+if (!isDev) {
+    await rest.put(
+        Routes.applicationGuildCommands(clientId, process.env.GUILD_ID),
+        { body: [] },
+    );
+}
+
 const route = isDev
     ? Routes.applicationGuildCommands(clientId, process.env.GUILD_ID)
     : Routes.applicationCommands(clientId);
