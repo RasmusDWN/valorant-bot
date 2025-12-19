@@ -54,6 +54,13 @@ CLIENT_ID=your_discord_app_client_id
 GUILD_ID=your_discord_server_id
 ```
 
+If you want to run a separate development bot, you can also add:
+```bash
+DEV_DISCORD_TOKEN=your_dev_discord_bot_token
+DEV_CLIENT_ID=your_dev_discord_app_client_id
+NODE_ENV=development
+```
+
 ### Running the Bot
 
 node [index.js](http://_vscodecontentref_/1)
