@@ -71,13 +71,14 @@ NODE_ENV=development
 
 ### Running the Bot
 
-node [index.js](http://_vscodecontentref_/1)
+`npm start`
 The bot should log in and register slash commands with your server.
 
 ### Project Structure
 ```bash
 /src
   /commands   # All Discord slash commands
+  /embeds     # Embed templates for certain commands
   /utils      # Helper functions (e.g., tier mapping)
 [index.js](http://_vscodecontentref_/2)      # Bot entry point
 .env          # Environment variables
