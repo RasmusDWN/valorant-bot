@@ -25,13 +25,15 @@ for (const file of commandFiles) {
     commands.push(command.data.toJSON());
 }
 
-// Register commands with Discord API
-const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
-
+// Register environment and REST client
 const isDev = process.env.NODE_ENV === 'development';
+const token = isDev ? process.env.DEV_DISCORD_TOKEN : process.env.DISCORD_TOKEN;
+const rest = new REST({ version: '10' }).setToken(token);
+
+const clientId = isDev ? process.env.DEV_CLIENT_ID : process.env.CLIENT_ID;
 const route = isDev
-    ? Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID)
-    : Routes.applicationCommands(process.env.CLIENT_ID);
+    ? Routes.applicationGuildCommands(clientId, process.env.GUILD_ID)
+    : Routes.applicationCommands(clientId);
 
 // Deploy commands to a specific guild
 (async () => {
@@ -66,4 +68,4 @@ client.once('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
 });
 
-client.login(process.env.DISCORD_TOKEN);
+client.login(token);
