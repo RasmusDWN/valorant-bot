@@ -38,7 +38,7 @@ const route = isDev
 // Deploy commands to a specific guild
 (async () => {
     try {
-        console.log('Started refreshin application (/) commands.');
+        console.log('Started refreshing application (/) commands.');
         await rest.put(
             route,
             { body: commands },
