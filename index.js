@@ -41,22 +41,28 @@ if (!token) {
 
 const rest = new REST({ version: '10' }).setToken(token);
 
-const clientId = isDev ? process.env.DEV_CLIENT_ID : process.env.CLIENT_ID;
-if (!clientId) {
-    console.error('Missing required environment variable: ' + (isDev ? 'DEV_CLIENT_ID' : 'CLIENT_ID'));
-    process.exit(1);
+let clientId;
+let route;
+if (isDev) {
+    clientId = process.env.DEV_CLIENT_ID;
+    const guildId = process.env.GUILD_ID;
+    if (!clientId) {
+        console.error('Missing required environment variable: DEV_CLIENT_ID');
+        process.exit(1);
+    }
+    if (!guildId) {
+        console.error('Missing required environment variable: GUILD_ID');
+        process.exit(1);
+    }
+    route = Routes.applicationGuildCommands(clientId, guildId);
+} else {
+    clientId = process.env.CLIENT_ID;
+    if (!clientId) {
+        console.error('Missing required environment variable: CLIENT_ID');
+        process.exit(1);
+    }
+    route = Routes.applicationCommands(clientId);
 }
-
-if (!isDev) {
-    await rest.put(
-        Routes.applicationGuildCommands(clientId, process.env.GUILD_ID),
-        { body: [] },
-    );
-}
-
-const route = isDev
-    ? Routes.applicationGuildCommands(clientId, process.env.GUILD_ID)
-    : Routes.applicationCommands(clientId);
 
 // Deploy commands to a specific guild
 (async () => {
