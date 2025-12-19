@@ -20,7 +20,7 @@ export function createBundleButtons(skinsInBundle) {
 export function createBundleEmbed(bundle, skinsInBundle) {
     const embed = new EmbedBuilder()
         .setTitle(bundle.displayName)
-        .setColor('#ff4656')
+        .setColor(this.VALORANT_RED)
         .setImage(bundle.displayIcon)
         .setDescription(
             skinsInBundle.length > 0

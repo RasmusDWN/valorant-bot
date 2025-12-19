@@ -50,7 +50,7 @@ export default {
 
                 const embed = new EmbedBuilder()
                     .setTitle(`${weapon.displayName} Skins (Page ${page + 1}/${totalPages})`)
-                    .setColor('#ff4655');
+                    .setColor(globalThis.VALORANT_RED);
 
                 skinsSlice.forEach(skin => {
                     embed.addFields({

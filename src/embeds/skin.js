@@ -14,7 +14,7 @@ export async function createSkinEmbed(skin) {
 
     const embed = new EmbedBuilder()
         .setTitle(weaponName)
-        .setColor('#ff4655')
+        .setColor(globalThis.VALORANT_RED)
         .setThumbnail(weapon?.displayIcon || null)
         .addFields(
             { name: 'Price', value: price, inline: true },

@@ -25,7 +25,7 @@ export default {
 
             const embed = new EmbedBuilder()
                 .setTitle(skin.displayName)
-                .setColor('#ff4655')
+                .setColor(globalThis.VALORANT_RED)
                 .setDescription(`Weapon: ${weapon.displayName}\nTier: ${skin.contentTierUuid ? getTierName(skin.contentTierUuid) : 'Unknown'}`)
                 .setImage(skin.fullRender || skin.displayIcon || null);
 

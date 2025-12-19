@@ -33,7 +33,7 @@ export default {
 
                 const embed = new EmbedBuilder()
                     .setTitle(`Valorant Bundles (Page ${pageIndex + 1}/${totalPages})`)
-                    .setColor('#ff4656');
+                    .setColor(globalThis.VALORANT_RED);
 
                 pageItems.forEach(bundle => {
                     embed.addFields({

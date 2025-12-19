@@ -128,7 +128,7 @@ async function buildBattlepassEmbed(contract, chapterIndex, levelIndex) {
 
     const embed = new EmbedBuilder()
         .setTitle(`Contract: ${contract.displayName}`)
-        .setColor('#ff4655')
+        .setColor(globalThis.VALORANT_RED)
         .setThumbnail(contract.displayIcon ?? null)
         .setFooter({
             text: `Chapter ${chapterIndex + 1}/${totalChapters} • Page ${levelIndex + 1}/${Math.ceil(chapter.levels.length / LEVELS_PER_PAGE)}`,

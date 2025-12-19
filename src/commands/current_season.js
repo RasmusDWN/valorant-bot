@@ -30,7 +30,7 @@ export default {
 
             const embed = new EmbedBuilder()
                 .setTitle(currentSeason.displayName)
-                .setColor('#ff4655')
+                .setColor(globalThis.VALORANT_RED)
                 .addFields(
                     { name: 'Start Time', value: new Date(currentSeason.startTime).toLocaleString(), inline: true },
                     { name: 'End Time', value: new Date(currentSeason.endTime).toLocaleString(), inline: true }
