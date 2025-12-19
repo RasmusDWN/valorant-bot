@@ -32,7 +32,7 @@ export default {
 
         const embed = new EmbedBuilder()
           .setTitle(map.displayName)
-          .setColor('#ff4655')
+          .setColor(globalThis.VALORANT_RED)
           .setThumbnail(map.splash || map.listViewIconTall || null)
           .setImage(map.displayIcon || null)
           .addFields(

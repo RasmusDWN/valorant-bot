@@ -33,7 +33,7 @@ export default {
 
             const embed = new EmbedBuilder()
                 .setTitle(weapon.displayName)
-                .setColor('#ff4655')
+                .setColor(globalThis.VALORANT_RED)
                 .setImage(weapon.displayIcon)
                 .addFields(
                     { name: 'Category', value: weapon.shopData?.categoryText || 'Unknown', inline: true },

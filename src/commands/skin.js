@@ -1,8 +1,8 @@
-import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import { SlashCommandBuilder } from 'discord.js';
 
 import { fetchSkinByName } from '../utils/fetch_skin.js';
-import { fetchWeaponFromSkin } from '../utils/weapons.js';
-import { getTierName, getTierPrice } from '../utils/tiers.js';
+
+import { createSkinEmbed } from '../embeds/skin.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -27,26 +27,7 @@ export default {
                 return;
             }
 
-            const weapon = await fetchWeaponFromSkin(skin);
-            const weaponName = weapon.displayName;
-            const chromas = skin.chromas?.length || 0;
-
-            const tier = skin.contentTierUuid
-                ? getTierName(skin.contentTierUuid)
-                : 'Unknown';
-
-            const price = getTierPrice(skin.contentTierUuid);
-
-            const embed = new EmbedBuilder()
-                .setTitle(weaponName)
-                .setColor('#ff4655')
-                .setThumbnail(weapon?.displayIcon || null)
-                .addFields(
-                    { name: 'Price', value: price, inline: true },
-                    { name: 'Tier', value: tier, inline: true },
-                    { name: 'Chromas', value: chromas.toString(), inline: true }
-                )
-                .setImage(skin.fullRender || skin.displayIcon || null);
+            const embed = await createSkinEmbed(skin);
 
             await interaction.editReply({ embeds: [embed] });
         } catch (error) {

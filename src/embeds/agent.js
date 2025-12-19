@@ -4,7 +4,7 @@ export function createAgentEmbed(agent) {
     const embed = new EmbedBuilder()
         .setTitle(agent.displayName)
         .setImage(agent.fullPortrait || agent.displayIcon)
-        .setColor('#ff4655')
+        .setColor(globalThis.VALORANT_RED)
         .setDescription(agent.description)
         .setFooter({ text: `Released on: ${new Date(agent.releaseDate).toLocaleDateString()}` });
 
@@ -26,7 +26,7 @@ export function createAgentEmbed(agent) {
 export function createAbilityEmbed(ability, agentName) {
     return new EmbedBuilder()
         .setTitle(`${ability.displayName} - ${agentName}`)
-        .setColor('#ff4655')
+        .setColor(globalThis.VALORANT_RED)
         .setImage(ability.displayIcon)
         .setDescription(ability.description);
 }

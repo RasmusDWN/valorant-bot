@@ -28,7 +28,7 @@ export default {
                 const agentsSlice = agentList.slice(start, end);
                 return new EmbedBuilder()
                     .setTitle(`Valorant Agents (Page ${page + 1}/${totalPages})`)
-                    .setColor('#ff4655')
+                    .setColor(globalThis.VALORANT_RED)
                     .setDescription(agentsSlice.map(agent => agent.displayName).join('\n'));
             };
 

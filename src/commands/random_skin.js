@@ -1,6 +1,8 @@
-import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import { SlashCommandBuilder } from 'discord.js';
+
 import fetch from 'node-fetch';
-import { getTierName } from '../utils/tiers.js';
+
+import { createSkinEmbed } from '../embeds/skin.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -23,11 +25,7 @@ export default {
             // pick a random skin from that weapon
             const skin = weapon.skins[Math.floor(Math.random() * weapon.skins.length)];
 
-            const embed = new EmbedBuilder()
-                .setTitle(skin.displayName)
-                .setColor('#ff4655')
-                .setDescription(`Weapon: ${weapon.displayName}\nTier: ${skin.contentTierUuid ? getTierName(skin.contentTierUuid) : 'Unknown'}`)
-                .setImage(skin.fullRender || skin.displayIcon || null);
+            const embed = await createSkinEmbed(skin);
 
             await interaction.editReply({ embeds: [embed] });
         } catch (error) {

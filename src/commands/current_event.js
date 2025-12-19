@@ -30,7 +30,7 @@ export default {
 
             const embed = new EmbedBuilder()
                 .setTitle(currentEvent.displayName)
-                .setColor('#ff4655')
+                .setColor(globalThis.VALORANT_RED)
                 .setDescription(currentEvent.shortDisplayName || 'No description available.')
                 .addFields(
                     { name: 'Start Time', value: new Date(currentEvent.startTime).toLocaleString(), inline: true },

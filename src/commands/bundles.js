@@ -1,6 +1,11 @@
 import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import fetch from 'node-fetch';
 
+import { fetchSkinByName } from '../utils/fetch_skin.js';
+
+import { createBundleEmbed, createBundleButtons } from '../embeds/bundle.js';
+import { createSkinEmbed } from '../embeds/skin.js';
+
 const BUNDLES_PER_PAGE = 5;
 
 export default {
@@ -12,20 +17,23 @@ export default {
         await interaction.deferReply();
 
         try {
-            const response = await fetch('https://valorant-api.com/v1/bundles');
-            const data = await response.json();
-            const bundles = data.data;
+            const [bundleRes, skinsRes] = await Promise.all([
+                fetch('https://valorant-api.com/v1/bundles'),
+                fetch('https://valorant-api.com/v1/weapons/skins')
+            ]);
+
+            const bundleData = (await bundleRes.json()).data;
+            const skinsData = (await skinsRes.json()).data;
 
             let page = 0;
-            const totalPages = Math.ceil(bundles.length / BUNDLES_PER_PAGE);
-
+            const totalPages = Math.ceil(bundleData.length / BUNDLES_PER_PAGE);
             const generateEmbed = (pageIndex) => {
                 const start = pageIndex * BUNDLES_PER_PAGE;
-                const pageItems = bundles.slice(start, start + BUNDLES_PER_PAGE);
+                const pageItems = bundleData.slice(start, start + BUNDLES_PER_PAGE);
 
                 const embed = new EmbedBuilder()
                     .setTitle(`Valorant Bundles (Page ${pageIndex + 1}/${totalPages})`)
-                    .setColor('#ff4656');
+                    .setColor(globalThis.VALORANT_RED);
 
                 pageItems.forEach(bundle => {
                     embed.addFields({
@@ -44,7 +52,7 @@ export default {
 
             const generateButtons = (pageIndex) => {
                 const start = pageIndex * BUNDLES_PER_PAGE;
-                const pageItems = bundles.slice(start, start + BUNDLES_PER_PAGE);
+                const pageItems = bundleData.slice(start, start + BUNDLES_PER_PAGE);
 
                 const row = new ActionRowBuilder();
 
@@ -73,7 +81,6 @@ export default {
                     .setDisabled(pageIndex === totalPages - 1)
             );
 
-
             const message = await interaction.editReply({
                 embeds: [generateEmbed(page)],
                 components: [generateButtons(page), navButtons(page)],
@@ -82,33 +89,69 @@ export default {
             const collector = message.createMessageComponentCollector({ time: 60000 });
 
             collector.on('collect', async i => {
-                if (i.user.id !== interaction.user.id) { return i.reply({ content: 'These buttons aren\'t for you!', ephemeral: true }); }
+                /* ---------- SKIN BUTTON (from bundle message) ---------- */
+                if (i.customId.startsWith('skin_')) {
+                    const skinName = i.customId
+                        .replace('skin_', '')
+                        .replaceAll('_', ' ');
 
-                if (i.customId === 'prevBundles') page--;
-                if (i.customId === 'nextBundles') page++;
+                    await i.deferReply();
 
+                    const skin = await fetchSkinByName(skinName.toLowerCase());
+                    const embed = await createSkinEmbed(skin);
+
+                    await i.editReply({ embeds: [embed] });
+                    return;
+                }
+
+                /* ---------- BUNDLE BUTTON ---------- */
                 if (i.customId.startsWith('bundle_')) {
                     const uuid = i.customId.replace('bundle_', '');
-                    const bundle = bundles.find(b => b.uuid === uuid);
+                    const bundle = bundleData.find(b => b.uuid === uuid);
 
-                    const embed = new EmbedBuilder()
-                        .setTitle(bundle.displayName)
-                        .setColor('#ff4656')
-                        .setImage(bundle.displayIcon);
+                    const skinsInBundle = skinsData.filter(skin =>
+                        skin.displayName.toLowerCase().startsWith(bundle.displayName.toLowerCase())
+                    );
 
-                    return i.update({ embeds: [embed], components: [] });
+                    const embed = createBundleEmbed(bundle, skinsInBundle);
+                    const buttons = createBundleButtons(skinsInBundle);
+
+                    const bundleMessage = await i.reply({
+                        embeds: [embed],
+                        components: buttons,
+                        fetchReply: true
+                    });
+
+                    // attach skin collector to message
+                    const skinCollector = bundleMessage.createMessageComponentCollector({
+                        time: 60000
+                    });
+
+                    skinCollector.on('collect', async skinInteraction => {
+                        if (!skinInteraction.customId.startsWith('skin_')) return;
+
+                        const skinName = skinInteraction.customId.replace('skin_', '').replaceAll('_', ' ');
+
+                        await skinInteraction.deferReply();
+
+                        const skin = await fetchSkinByName(skinName.toLowerCase());
+                        const embed = await createSkinEmbed(skin);
+
+                        await skinInteraction.editReply({ embeds: [embed] });
+                    });
+
+                    return;
                 }
+
+                /* ---------- NAVIGATION ---------- */
+                if (i.customId === 'prevBundles') page--;
+                if (i.customId === 'nextBundles') page++;
 
                 await i.update({
                     embeds: [generateEmbed(page)],
                     components: [generateButtons(page), navButtons(page)],
                 });
             });
-
-            collector.on('end', () => {
-                interaction.editReply({ components: [] });
-            });
-
         } catch (error) {
             console.error('Error fetching bundles:', error);
             await interaction.editReply('There was an error fetching the bundles. Please try again later.');
