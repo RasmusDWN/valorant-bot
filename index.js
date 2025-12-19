@@ -28,12 +28,17 @@ for (const file of commandFiles) {
 // Register commands with Discord API
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
 
+const isDev = process.env.NODE_ENV === 'development';
+const route = isDev
+    ? Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID)
+    : Routes.applicationCommands(process.env.CLIENT_ID);
+
 // Deploy commands to a specific guild
 (async () => {
     try {
         console.log('Started refreshin application (/) commands.');
         await rest.put(
-            Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
+            route,
             { body: commands },
         );
         console.log('Successfully reloaded application (/) commands.');
