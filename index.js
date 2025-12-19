@@ -27,10 +27,23 @@ for (const file of commandFiles) {
 
 // Register environment and REST client
 const isDev = process.env.NODE_ENV === 'development';
+
+// Determine the correct token based on environment
 const token = isDev ? process.env.DEV_DISCORD_TOKEN : process.env.DISCORD_TOKEN;
+if (!token) {
+    const exptectedVar = isDev ? 'DEV_DISCORD_TOKEN' : 'DISCORD_TOKEN';
+    console.log(`Discord bot token is not set. Please set the ${exptectedVar} environment variable.`);
+    process.exit(1);
+}
+
 const rest = new REST({ version: '10' }).setToken(token);
 
 const clientId = isDev ? process.env.DEV_CLIENT_ID : process.env.CLIENT_ID;
+if (!clientId) {
+    console.error('Missing required environment variable: ' + (isDev ? 'DEV_CLIENT_ID' : 'CLIENT_ID'));
+    process.exit(1);
+}
+
 const route = isDev
     ? Routes.applicationGuildCommands(clientId, process.env.GUILD_ID)
     : Routes.applicationCommands(clientId);
