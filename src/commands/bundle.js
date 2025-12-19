@@ -2,10 +2,9 @@ import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, But
 import fetch from 'node-fetch';
 
 import { fetchSkinByName } from '../utils/fetch_skin.js';
-import { fetchWeaponFromSkin } from '../utils/weapons.js';
-import { getTierName, getTierPrice } from '../utils/tiers.js';
 
 import { createBundleEmbed, createBundleButtons } from '../embeds/bundle.js';
+import { createSkinEmbed } from '../embeds/skin.js';
 
 export default {
     data: new SlashCommandBuilder()
@@ -54,22 +53,9 @@ export default {
 
                 const skinName = i.customId.replace("skin_", "").replaceAll("_", " "); // Extract skin name from customId
                 const skin = await fetchSkinByName(skinName.toLowerCase());
-                const weapon = await fetchWeaponFromSkin(skin);
+                const embed = await createSkinEmbed(skin);
 
-                return i.reply({
-                    embeds: [
-                        new EmbedBuilder()
-                            .setTitle(skin.displayName)
-                            .setColor('#ff4655')
-                            .setThumbnail(weapon.displayIcon)
-                            .addFields(
-                                { name: 'Price', value: getTierPrice(skin.contentTierUuid), inline: true },
-                                { name: 'Tier', value: getTierName(skin.contentTierUuid), inline: true },
-                                { name: 'Chromas', value: (skin.chromas?.length || 0).toString(), inline: true }
-                            )
-                            .setImage(skin.fullRender ?? skin.displayIcon ?? null)
-                    ]
-                });
+                return i.reply({embeds: [embed]});
             });
         } catch (error) {
             console.error(error);
