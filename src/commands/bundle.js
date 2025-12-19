@@ -55,7 +55,7 @@ export default {
                 const skin = await fetchSkinByName(skinName.toLowerCase());
                 const embed = await createSkinEmbed(skin);
 
-                return i.reply({embeds: [embed]});
+                return i.reply({ embeds: [embed] });
             });
         } catch (error) {
             console.error(error);

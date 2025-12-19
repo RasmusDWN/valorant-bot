@@ -113,7 +113,7 @@ export default {
                     const skin = await fetchSkinByName(skinName);
                     const embed = await createSkinEmbed(skin);
 
-                    return i.reply({embeds: [embed]});
+                    return i.reply({ embeds: [embed] });
                 }
 
                 await i.update({
