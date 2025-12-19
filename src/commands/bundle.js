@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import { SlashCommandBuilder } from 'discord.js';
 import fetch from 'node-fetch';
 
 import { fetchSkinByName } from '../utils/fetch_skin.js';
