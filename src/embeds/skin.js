@@ -10,10 +10,10 @@ export async function createSkinEmbed(skin) {
         ? getTierName(skin.contentTierUuid)
         : 'Unknown';
     const weapon = await fetchWeaponFromSkin(skin);
-    const weaponName = weapon.displayName;
+    const skinName = skin.displayName;
 
     const embed = new EmbedBuilder()
-        .setTitle(weaponName)
+        .setTitle(skinName)
         .setColor(globalThis.VALORANT_RED)
         .setThumbnail(weapon?.displayIcon || null)
         .addFields(
