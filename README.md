@@ -8,9 +8,17 @@
 
 - **/agents** – List all Valorant agents
 - **/agent [name]** – Get detailed info about a single agent (abilities, portrait)
-- **/weapon [name]** – Look up weapon stats, cost, category, wall penetration
+- **/battlepass** - Show the latest live battlepass (contract) in Valorant
+- **/bundle [name]** – Show details about a specific skin bundle (skins, price)
+- **/bundles** – List all available skin bundles (with pagination)
+- **/currentevent** – Show details about the current Valorant event
+- **/currentseason** – Show details about the current Valorant season
+- **/map [name]** – Look up a Valorant map
+- **/newestagent** - Show detailed info about the newest Valorant agent released
+- **/randomskin** – Get a random skin from the entire Valorant collection
 - **/skin [name]** – Show details about a single skin (tier, images)
 - **/skins [weapon]** – List all skins for a specific weapon (with pagination)
+- **/weapon [name]** – Look up weapon stats, cost, category, wall penetration
 
 ---
 
