@@ -14,61 +14,60 @@ export default {
     async execute(interaction) {
         await interaction.deferReply();
 
-        const [contractsResponse, eventsResponse] = await Promise.all([
-            fetch('https://valorant-api.com/v1/contracts'),
-            fetch('https://valorant-api.com/v1/events')
-        ]);
-
-        const contracts = (await contractsResponse.json()).data;
-        const events = (await eventsResponse.json()).data;
-
-        const now = new Date();
-
-        const contract = contracts.find(c => {
-            const event = events.find(ev => ev.uuid === c.content?.relationUuid);
-            if (!event) return false;
-            return now >= new Date(event.startTime) && now <= new Date(event.endTime);
-        });
-
-        if (!contract) {
-            return interaction.editReply('No active battlepass found.');
-        }
-
-        let chapterIndex = 0;
-        let levelIndex = 0;
-
-        const embed = await buildBattlepassEmbed(contract, chapterIndex, levelIndex);
-        const components = await buildBattlepassButtons(contract, chapterIndex, levelIndex);
-
-        const message = await interaction.editReply({ embeds: [embed], components });
-
-        const collector = message.createMessageComponentCollector({ time: 120_000 });
-
-        collector.on('collect', async i => {
-            if (i.user.id !== interaction.user.id) {
-                return i.reply({ content: 'These buttons aren\'t for you!', ephemeral: true });
-            }
-
-            const [, direction, scope, chap, lvl] = i.customId.split('_');
-            chapterIndex = parseInt(chap);
-            levelIndex = parseInt(lvl);
-
-            if (scope === 'level') {
-                if (direction === 'next') levelIndex++;
-                if (direction === 'prev') levelIndex--;
-            } else if (scope === 'chapter') {
-                if (direction === 'next') chapterIndex++;
-                if (direction === 'prev') chapterIndex--;
-                levelIndex = 0; // Reset level index when changing chapters
-            }
-
-            const newEmbed = await buildBattlepassEmbed(contract, chapterIndex, levelIndex);
-            const newComponents = await buildBattlepassButtons(contract, chapterIndex, levelIndex);
-
-            await i.update({ embeds: [newEmbed], components: newComponents });
-        });
-
         try {
+            const [contractsResponse, eventsResponse] = await Promise.all([
+                fetch('https://valorant-api.com/v1/contracts'),
+                fetch('https://valorant-api.com/v1/events')
+            ]);
+
+            const contracts = (await contractsResponse.json()).data;
+            const events = (await eventsResponse.json()).data;
+
+            const now = new Date();
+
+            const contract = contracts.find(c => {
+                const event = events.find(ev => ev.uuid === c.content?.relationUuid);
+                if (!event) return false;
+                return now >= new Date(event.startTime) && now <= new Date(event.endTime);
+            });
+
+            if (!contract) {
+                return interaction.editReply('No active battlepass found.');
+            }
+
+            let chapterIndex = 0;
+            let levelIndex = 0;
+
+            const embed = await buildBattlepassEmbed(contract, chapterIndex, levelIndex);
+            const components = await buildBattlepassButtons(contract, chapterIndex, levelIndex);
+
+            const message = await interaction.editReply({ embeds: [embed], components });
+
+            const collector = message.createMessageComponentCollector({ time: 120_000 });
+
+            collector.on('collect', async i => {
+                if (i.user.id !== interaction.user.id) {
+                    return i.reply({ content: 'These buttons aren\'t for you!', ephemeral: true });
+                }
+
+                const [, direction, scope, chap, lvl] = i.customId.split('_');
+                chapterIndex = parseInt(chap);
+                levelIndex = parseInt(lvl);
+
+                if (scope === 'level') {
+                    if (direction === 'next') levelIndex++;
+                    if (direction === 'prev') levelIndex--;
+                } else if (scope === 'chapter') {
+                    if (direction === 'next') chapterIndex++;
+                    if (direction === 'prev') chapterIndex--;
+                    levelIndex = 0; // Reset level index when changing chapters
+                }
+
+                const newEmbed = await buildBattlepassEmbed(contract, chapterIndex, levelIndex);
+                const newComponents = await buildBattlepassButtons(contract, chapterIndex, levelIndex);
+
+                await i.update({ embeds: [newEmbed], components: newComponents });
+            });
         } catch (error) {
             console.error(`Error in /battlepass command: ${error}`);
             await interaction.editReply('An error occurred while fetching the battlepass data.');
