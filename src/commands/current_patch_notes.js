@@ -69,29 +69,28 @@ export default {
 
                 const row = new ActionRowBuilder();
 
-                // Prev / Next buttons
-                row.addComponents(
-                    new ButtonBuilder()
-                        .setCustomId('prevPage')
-                        .setLabel('⬅️ Previous')
-                        .setStyle(ButtonStyle.Primary)
-                        .setDisabled(pageIndex === 0),
-                    new ButtonBuilder()
-                        .setCustomId('nextPage')
-                        .setLabel('Next ➡️')
-                        .setStyle(ButtonStyle.Primary)
-                        .setDisabled(pageIndex === totalPages - 1)
-                );
-
-                // Add "View Full Patch Notes" only if there’s more content than one page
-                if (tldrItems.length > BULLETS_PER_PAGE) {
+                if (totalPages > 1) {
+                    // Prev / Next buttons
                     row.addComponents(
                         new ButtonBuilder()
-                            .setLabel('View Full Patch Notes')
-                            .setStyle(ButtonStyle.Link)
-                            .setURL(patchUrl)
+                            .setCustomId('prevPage')
+                            .setLabel('⬅️ Previous')
+                            .setStyle(ButtonStyle.Primary)
+                            .setDisabled(pageIndex === 0),
+                        new ButtonBuilder()
+                            .setCustomId('nextPage')
+                            .setLabel('Next ➡️')
+                            .setStyle(ButtonStyle.Primary)
+                            .setDisabled(pageIndex === totalPages - 1)
                     );
                 }
+
+                row.addComponents(
+                    new ButtonBuilder()
+                        .setLabel('View Full Patch Notes')
+                        .setStyle(ButtonStyle.Link)
+                        .setURL(patchUrl)
+                )
 
                 return [row];
             };
