@@ -124,7 +124,7 @@ export default {
 
         } catch (err) {
             console.error('Patch TL;DR error:', err);
-            await interaction.editReply("Oops, I couldn't fetch the latest patch TL;DR 😢");
+            await interaction.editReply("Sorry, I couldn't fetch the latest patch notes right now. Please try again later.");
         }
     }
 };
