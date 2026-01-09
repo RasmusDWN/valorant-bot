@@ -37,17 +37,18 @@ export default {
 
             // Extract TL;DR from <p> tags under TL;DR heading
             let tldrItems = [];
-            $('h2, h3').each((_, el) => {
-                const heading = $(el).text().trim().toLowerCase();
-                if (heading.includes('TL;DR') || heading.includes('TLDR')) {
-                    let next = $(el).next();
-                    while (next.length && !['h2', 'h3'].includes(next[0].name)) {
-                        if (next[0].name === 'p') {
-                            const text = next.text().trim();
-                            if (text) tldrItems.push(text);
-                        }
-                        next = next.next();
-                    }
+
+            $('p').each((_, el) => {
+                const text = $(el).text().replace(/\u00/g, '').trim(); // Clean unwanted characters
+                const tldrMatch = text.toLowerCase().includes('tl;dr') || text.toLowerCase().includes('tldr');
+
+                if (tldrMatch) {
+                    const ul = $(el).next('ul');
+
+                    ul.find('li').each((_, li) => {
+                        const bullet = $(li).text().replace(/\u00/g, '').trim();
+                        if (bullet) tldrItems.push(bullet);
+                    })
                 }
             });
 
@@ -63,7 +64,10 @@ export default {
                 return new EmbedBuilder()
                     .setTitle('🔥 Latest Valorant Patch Notes')
                     .setURL(patchUrl)
-                    .setDescription(pageItems.map(b => `• ${b}`).join('\n'))
+                    .setDescription(
+                        `**TL;DR:**\n` +
+                        pageItems.map(b => `• ${b}`).join('\n')
+                    )
                     .setColor('#FF4655')
                     .setImage(bannerImage)
                     .setFooter({ text: `Page ${pageIndex + 1}/${totalPages}` });
