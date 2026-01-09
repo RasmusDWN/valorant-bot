@@ -4,6 +4,10 @@ import * as cheerio from 'cheerio';
 
 const BULLETS_PER_PAGE = 5;
 
+// /currentpatchnotes
+//
+// Uses Cheerio to scrape the latest Valorant patch notes page, and links it. Also
+// extracts the TL;DR section for the embed description, with pagination if necessary.
 export default {
     data: new SlashCommandBuilder()
         .setName('currentpatchnotes')
