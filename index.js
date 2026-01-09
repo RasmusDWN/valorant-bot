@@ -10,10 +10,17 @@ import './src/utils/colors.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+/* -----------------------------------------------------
+    Client Setup
+----------------------------------------------------- */
+
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 client.commands = new Collection();
 
-// Load commands dynamically
+/* -----------------------------------------------------
+    Load commands dynamically and register them
+----------------------------------------------------- */
+
 const commands = [];
 const commandsPath = path.join(__dirname, 'src', 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
@@ -28,6 +35,10 @@ for (const file of commandFiles) {
     commands.push(command.data.toJSON());
 }
 
+/* -----------------------------------------------------
+    Environment Setup & token handling
+----------------------------------------------------- */
+
 // Register environment and REST client
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -39,10 +50,15 @@ if (!token) {
     process.exit(1);
 }
 
+/* -----------------------------------------------------
+    REST Client
+----------------------------------------------------- */
+
 const rest = new REST({ version: '10' }).setToken(token);
 
 let clientId;
 let route;
+
 if (isDev) {
     clientId = process.env.DEV_CLIENT_ID;
     const guildId = process.env.GUILD_ID;
@@ -67,18 +83,29 @@ if (isDev) {
 // Deploy commands to a specific guild
 (async () => {
     try {
-        console.log('Started refreshing application (/) commands.');
+        if (!isDev && process.env.GUILD_ID) {
+            console.log('Clearing old guild commands...');
+            await rest.put(
+                Routes.applicationGuildCommands(clientId, process.env.GUILD_ID),
+                { body: [] }
+            );
+        }
+
+        console.log('Registering slash commands...');
         await rest.put(
             route,
-            { body: commands },
+            { body: commands }
         );
-        console.log('Successfully reloaded application (/) commands.');
+        console.log('Slash commands registered successfully.');
     } catch (error) {
         console.error(error);
     }
 })();
 
-// Handle interactions
+/* -----------------------------------------------------
+    Interaction Handling
+----------------------------------------------------- */
+
 client.on('interactionCreate', async interaction => {
     if (!interaction.isChatInputCommand()) return;
 
@@ -92,6 +119,10 @@ client.on('interactionCreate', async interaction => {
         await interaction.reply({ content: 'There was an error while executing this command.', ephemeral: true });
     }
 });
+
+/* -----------------------------------------------------
+    Ready & login
+----------------------------------------------------- */
 
 client.once('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
