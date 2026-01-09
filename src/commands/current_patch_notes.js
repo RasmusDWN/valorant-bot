@@ -39,22 +39,7 @@ export default {
             // Banner image
             const bannerImage = $('meta[property="og:image"]').attr('content') || null;
 
-            // Extract TL;DR from <p> tags under TL;DR heading
-            let tldrItems = [];
-
-            $('p').each((_, el) => {
-                const text = $(el).text().replace(/\u00/g, '').trim(); // Clean unwanted characters
-                const tldrMatch = text.toLowerCase().includes('tl;dr') || text.toLowerCase().includes('tldr');
-
-                if (tldrMatch) {
-                    const ul = $(el).next('ul');
-
-                    ul.find('li').each((_, li) => {
-                        const bullet = $(li).text().replace(/\u00/g, '').trim();
-                        if (bullet) tldrItems.push(bullet);
-                    })
-                }
-            });
+            const tldrItems = extractTldr($);
 
             if (tldrItems.length === 0) tldrItems.push('TL;DR not found for this patch.');
 
@@ -144,3 +129,28 @@ export default {
         }
     }
 };
+
+// Extract TL;DR from <p> tags under TL;DR heading
+function extractTldr($) {
+    let items = [];
+
+    $('p').each((_, el) => {
+        const text = $(el)
+            .text()
+            .replace(/\u00/g, '') // Clean unwanted characters
+            .trim()
+            .toLowerCase();
+        const includesTldr = text.includes('tldr') || text.includes('tl;dr') || text.includes('tl:dr');
+
+        if (includesTldr) {
+            const ul = $(el).next('ul');
+
+            ul.find('li').each((_, li) => {
+                const bullet = $(li).text().replace(/\u00/g, '').trim();
+                if (bullet) items.push(bullet);
+            })
+        }
+    });
+
+    return items;
+}
