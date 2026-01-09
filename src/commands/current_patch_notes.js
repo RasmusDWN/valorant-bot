@@ -97,26 +97,25 @@ export default {
                 return [row];
             };
 
-            // Track pages per user
-            const userPages = new Map(); // userId => page number
+            // Track current page (only the command invoker can use the buttons)
+            let page = 0;
 
             // Send initial reply
             const message = await interaction.editReply({
-                embeds: [generateEmbed(0)],
-                components: navButtons(0)
+                embeds: [generateEmbed(page)],
+                components: navButtons(page)
             });
 
             // Collector for pagination
             const collector = message.createMessageComponentCollector({ time: 120000 });
-
             collector.on('collect', async i => {
-                if (!userPages.has(i.user.id)) userPages.set(i.user.id, 0);
-                let page = userPages.get(i.user.id);
-
+                // Only allow the user who ran the command to use the buttons
+                if (i.user.id !== interaction.user.id) {
+                    await i.reply({ content: "These buttons aren't for you!", ephemeral: true });
+                    return;
+                }
                 if (i.customId === 'prevPage') page = Math.max(0, page - 1);
                 if (i.customId === 'nextPage') page = Math.min(totalPages - 1, page + 1);
-
-                userPages.set(i.user.id, page);
 
                 await i.update({
                     embeds: [generateEmbed(page)],
