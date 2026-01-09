@@ -1,10 +1,4 @@
-import {
-    SlashCommandBuilder,
-    EmbedBuilder,
-    ButtonBuilder,
-    ActionRowBuilder,
-    ButtonStyle
-} from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
 
@@ -19,7 +13,7 @@ export default {
         await interaction.deferReply();
 
         try {
-            // 1️⃣ Get the latest patch URL
+            // Get the latest patch URL
             const listUrl = 'https://playvalorant.com/en-us/news/tags/patch-notes/';
             const listRes = await fetch(listUrl);
             const listHtml = await listRes.text();
@@ -33,19 +27,19 @@ export default {
 
             const patchUrl = `https://playvalorant.com${firstLink}`;
 
-            // 2️⃣ Fetch the patch page
+            // Fetch the patch page
             const patchRes = await fetch(patchUrl);
             const patchHtml = await patchRes.text();
             const $ = cheerio.load(patchHtml);
 
-            // 3️⃣ Banner image
+            // Banner image
             const bannerImage = $('meta[property="og:image"]').attr('content') || null;
 
-            // 4️⃣ Extract TL;DR from <p> tags under TL;DR heading
+            // Extract TL;DR from <p> tags under TL;DR heading
             let tldrItems = [];
             $('h2, h3').each((_, el) => {
                 const heading = $(el).text().trim().toLowerCase();
-                if (heading.includes('tl;dr') || heading.includes('tldr')) {
+                if (heading.includes('TL;DR') || heading.includes('TLDR')) {
                     let next = $(el).next();
                     while (next.length && !['h2', 'h3'].includes(next[0].name)) {
                         if (next[0].name === 'p') {
@@ -75,7 +69,7 @@ export default {
                     .setFooter({ text: `Page ${pageIndex + 1}/${totalPages}` });
             };
 
-            // 6️⃣ Navigation buttons
+            // Navigation buttons
             const navButtons = (pageIndex) => {
                 // If TL;DR fits on one page, return empty array (no buttons)
                 if (totalPages <= 1) return [];
@@ -109,7 +103,7 @@ export default {
                 return [row];
             };
 
-            // 7️⃣ Track pages per user
+            // Track pages per user
             const userPages = new Map(); // userId => page number
 
             // Send initial reply
@@ -118,7 +112,7 @@ export default {
                 components: navButtons(0)
             });
 
-            // 8️⃣ Collector for pagination
+            // Collector for pagination
             const collector = message.createMessageComponentCollector({ time: 120000 });
 
             collector.on('collect', async i => {
