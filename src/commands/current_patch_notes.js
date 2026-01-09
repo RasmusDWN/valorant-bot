@@ -122,6 +122,15 @@ export default {
                 });
             });
 
+            collector.on('end', async () => {
+                // Disable buttons after timeout
+                try {
+                    await message.edit({ components: [] });
+                } catch (err) {
+                    console.error('Failed to disable buttons after timeout:', err);
+                }
+            });
+
         } catch (err) {
             console.error('Patch TL;DR error:', err);
             await interaction.editReply("Sorry, I couldn't fetch the latest patch notes right now. Please try again later.");
