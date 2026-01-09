@@ -149,7 +149,7 @@ function extractTldr($) {
             ul.find('li').each((_, li) => {
                 const bullet = $(li).text().replace(/\u0000/g, '').trim();
                 if (bullet) items.push(bullet);
-            })
+            });
         }
     });
 
