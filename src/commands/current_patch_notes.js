@@ -31,8 +31,7 @@ export default {
             const patchUrl = `https://playvalorant.com${firstLink}`;
 
             // Fetch the patch page
-            const patchRes = await fetch(patchUrl);
-            const patchHtml = await patchRes.text();
+            const patchHtml = await safeFetch(patchUrl);
             const $ = cheerio.load(patchHtml);
 
             // Banner image
