@@ -38,7 +38,7 @@ export default {
             // Banner image
             const bannerImage = $('meta[property="og:image"]').attr('content') || null;
 
-            const tldrItems = extractTldr($);
+            let tldrItems = extractTldr($);
 
             if (tldrItems.length === 0) {
                 tldrItems = ['TL;DR not found for this patch.']
