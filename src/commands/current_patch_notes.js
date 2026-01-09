@@ -40,7 +40,9 @@ export default {
 
             const tldrItems = extractTldr($);
 
-            if (tldrItems.length === 0) tldrItems.push('TL;DR not found for this patch.');
+            if (tldrItems.length === 0) {
+                tldrItems = ['TL;DR not found for this patch.']
+            }
 
             const totalPages = Math.ceil(tldrItems.length / BULLETS_PER_PAGE);
 
