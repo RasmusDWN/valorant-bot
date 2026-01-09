@@ -19,8 +19,7 @@ export default {
         try {
             // Get the latest patch URL
             const listUrl = 'https://playvalorant.com/en-us/news/tags/patch-notes/';
-            const listRes = await fetch(listUrl);
-            const listHtml = await listRes.text();
+            const listHtml = await safeFetch(listUrl);
             const $list = cheerio.load(listHtml);
 
             const firstLink = $list('a[href*="game-updates/valorant-patch-notes-"]')
@@ -153,4 +152,20 @@ function extractTldr($) {
     });
 
     return items;
+}
+
+async function safeFetch(url) {
+    let response;
+    try {
+        response = await fetch(url);
+    } catch (err) {
+        throw new Error(`Network error when trying to fetch ${url}: ${err.message}`);
+    }
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
+    }
+
+    const text = await response.text();
+    return text;
 }
