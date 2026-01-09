@@ -56,7 +56,7 @@ export default {
 
             const totalPages = Math.ceil(tldrItems.length / BULLETS_PER_PAGE);
 
-            // 5️⃣ Generate embed for a specific page
+            // Generate embed for a specific page
             const generateEmbed = (pageIndex) => {
                 const start = pageIndex * BULLETS_PER_PAGE;
                 const pageItems = tldrItems.slice(start, start + BULLETS_PER_PAGE);
