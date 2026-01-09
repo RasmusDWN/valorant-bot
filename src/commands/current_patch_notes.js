@@ -137,7 +137,7 @@ function extractTldr($) {
     $('p').each((_, el) => {
         const text = $(el)
             .text()
-            .replace(/\u00/g, '') // Clean unwanted characters
+            .replace(/\u0000/g, '') // Clean unwanted characters
             .trim()
             .toLowerCase();
         const includesTldr = text.includes('tldr') || text.includes('tl;dr') || text.includes('tl:dr');
@@ -146,7 +146,7 @@ function extractTldr($) {
             const ul = $(el).next('ul');
 
             ul.find('li').each((_, li) => {
-                const bullet = $(li).text().replace(/\u00/g, '').trim();
+                const bullet = $(li).text().replace(/\u0000/g, '').trim();
                 if (bullet) items.push(bullet);
             })
         }
