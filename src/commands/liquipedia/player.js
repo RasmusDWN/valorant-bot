@@ -57,7 +57,7 @@ export default {
           { name: 'Team', value: player.teampagename, inline: true },
           { name: 'Status', value: player.status, inline: true },
           { name: 'Nationality', value: player.nationality, inline: true },
-          { name: 'Est. Earnings', value: String(player.earnings), inline: true }
+          { name: 'Est. Earnings', value: `$${player.earnings}`, inline: true }
         );
 
       if (imageUrl) {
