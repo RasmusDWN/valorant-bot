@@ -48,7 +48,8 @@ export default {
       const embed = new EmbedBuilder()
         .setTitle(player.pagename)
         .setColor(globalThis.VALORANT_RED)
-        .setURL(`https://liquipedia.net/valorant/${encodeURIComponent(player.pagename)}`)
+        .setDescription(`[View on Liquipedia](https://liquipedia.net/valorant/${encodeURIComponent(player.pagename)})`)
+        .setFooter({ text: 'Data source: Liquipedia', iconURL: 'https://liquipedia.net/commons/images/2/2c/Liquipedia_logo.png' })
         .addFields(
           { name: 'Team', value: player.teampagename, inline: true },
           { name: 'Status', value: player.status, inline: true },
