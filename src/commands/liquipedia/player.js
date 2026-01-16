@@ -1,6 +1,8 @@
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import fetch from 'node-fetch';
 
+import { fetchLiquipediaImage } from '../../utils/fetch_image.js';
+
 export default {
   data: new SlashCommandBuilder()
     .setName('player')
@@ -32,15 +34,22 @@ export default {
 
       const player = data.result[0];
 
+      const imageUrl = await fetchLiquipediaImage(player.pagename);
+
       const embed = new EmbedBuilder()
         .setTitle(player.pagename)
         .setColor(globalThis.VALORANT_RED)
         .setURL(`https://liquipedia.net/valorant/${encodeURIComponent(player.pagename)}`)
         .addFields(
-          { name: 'Team', value: player.teampagename || 'N/A', inline: true },
-          { name: 'Status', value: player.status || 'N/A', inline: true },
-          { name: 'Nationality', value: player.nationality || 'N/A', inline: true },
+          { name: 'Team', value: player.teampagename, inline: true },
+          { name: 'Status', value: player.status, inline: true },
+          { name: 'Nationality', value: player.nationality, inline: true },
+          { name: 'Est. Earnings', value: String(player.earnings), inline: true }
         );
+
+      if (imageUrl) {
+        embed.setImage(imageUrl);
+      }
 
       await interaction.editReply({ embeds: [embed] });
     } catch (error) {
