@@ -2,6 +2,7 @@ import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import fetch from 'node-fetch';
 
 import { fetchLiquipediaImage } from '../../utils/fetch_image.js';
+import { getCache, setCache } from '../../utils/cache.js';
 
 export default {
   data: new SlashCommandBuilder()
@@ -17,6 +18,14 @@ export default {
     await interaction.deferReply();
 
     const playerName = interaction.options.getString('ign');
+
+    // Check cache first
+    const cacheKey = `player-${playerName.toLowerCase()}`;
+    const cachedData = getCache(cacheKey);
+    if (cachedData) {
+      await interaction.editReply(cachedData);
+      return;
+    }
 
     try {
       const response = await fetch(`https://api.liquipedia.net/api/v3/player?wiki=valorant&conditions=%5B%5Bpagename%3A%3A${encodeURIComponent(playerName)}%5D%5D`, {
@@ -51,7 +60,12 @@ export default {
         embed.setImage(imageUrl);
       }
 
-      await interaction.editReply({ embeds: [embed] });
+      const replyPayload = { embeds: [embed] };
+
+      // Cache the embed for future requests (cache for 1 hour)
+      setCache(cacheKey, replyPayload, 1000 * 60 * 60);
+
+      await interaction.editReply(replyPayload);
     } catch (error) {
       console.error(error);
       await interaction.editReply('There was an error while fetching the player data. Please try again later.');
