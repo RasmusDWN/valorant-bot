@@ -4,6 +4,9 @@ import fetch from 'node-fetch';
 import { fetchLiquipediaImage } from '../../utils/fetch_image.js';
 import { getCache, setCache } from '../../utils/cache.js';
 
+// /player #{player-name}
+//
+// Look up a Valorant player via Liquipedia API
 export default {
   data: new SlashCommandBuilder()
     .setName('player')
