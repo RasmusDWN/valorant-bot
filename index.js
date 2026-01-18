@@ -21,13 +21,26 @@ client.commands = new Collection();
     Load commands dynamically and register them
 ----------------------------------------------------- */
 
+function getAllCommandFiles(dir) {
+    let results = [];
+    const list = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of list) {
+        const fullPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+            results = results.concat(getAllCommandFiles(fullPath));
+        } else if (entry.isFile() && entry.name.endsWith('.js')) {
+            results.push(fullPath);
+        }
+    }
+    return results;
+}
+
 const commands = [];
 const commandsPath = path.join(__dirname, 'src', 'commands');
-const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+const commandFiles = getAllCommandFiles(commandsPath);
 
 // Import each command file and set it in the client's command collection
-for (const file of commandFiles) {
-    const filePath = path.join(commandsPath, file);
+for (const filePath of commandFiles) {
     const commandModule = await import(`file://${filePath}`);
     const command = commandModule.default || commandModule;
 
