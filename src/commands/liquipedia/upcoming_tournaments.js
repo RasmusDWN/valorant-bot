@@ -23,7 +23,10 @@ export default {
     }
 
     try {
-      const response = await fetch(`https://api.liquipedia.net/api/v3/tournament?wiki=valorant&groupby=startdate%20ASC`, {
+      const today = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
+      const apiUrl = `https://api.liquipedia.net/api/v3/tournament?wiki=valorant&conditions=%5B%5Bstartdate%3A%3A%3E${today}%5D%5D&groupby=startdate%20ASC`;
+      console.log('apiUrl:', apiUrl);
+      const response = await fetch(apiUrl, {
         headers: {
           'accept': 'application/json',
           'authorization': `Apikey ${process.env.LIQUIPEDIA_API_KEY}`
@@ -31,12 +34,9 @@ export default {
       });
 
       const data = await response.json();
-      const now = Date.now();
-      const upcomingTournaments = data.result.filter(tournament => tournament.enddate && Date.parse(tournament.enddate) >= now);
-      console.log('upcomingTournaments:', upcomingTournaments);
-      const tournaments = upcomingTournaments.slice(0, 5); // Get next 5 upcoming tournaments
+      const upcomingTournaments = data.result.slice(0, 5); // Get next 5 upcoming tournaments
 
-      if (!tournaments || tournaments.length === 0) {
+      if (!upcomingTournaments || upcomingTournaments.length === 0) {
         await interaction.editReply('No upcoming tournaments found.');
         return;
       }
@@ -46,9 +46,8 @@ export default {
         .setColor(globalThis.VALORANT_RED)
         .setFooter({ text: 'Data source: Liquipedia', iconURL: 'https://liquipedia.net/commons/images/2/2c/Liquipedia_logo.png' });
 
-      tournaments.forEach(tournament => {
+      upcomingTournaments.forEach(tournament => {
         const startDate = new Date(tournament.startdate).toLocaleString('en-GB');
-        console.log('embed startDate:', startDate);
         embed.addFields({
           name: tournament.name,
           value: `Start: ${startDate} UTC\n[View on Liquipedia](https://liquipedia.net/valorant/${encodeURIComponent(tournament.pagename)})`,
