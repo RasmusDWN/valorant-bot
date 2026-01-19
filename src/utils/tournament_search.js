@@ -9,41 +9,58 @@ const TOURNAMENT_ALIASES = {
     'valorant champions': ['valorant champions', 'champions', 'worlds'],
 }
 
-/** 
- * Normalize user input for tournament search
+/**
+ * Expand user input into a list of search tokens
  */
-export function normalizeTournamentQuery(input) {
-    return input.toLowerCase().trim();  
+export function buildSearchTokens(input) {
+    const query = input.toLowerCase().trim();
+    const tokens = new Set([query]);
+
+    for (const aliases of Object.values(TOURNAMENT_ALIASES)) {
+        if (aliases.some(alias => query.includes(alias))) {
+            aliases.forEach(alias => tokens.add(alias));
+        }
+    }
+    
+    return [...tokens];
 }
 
 /**
  * Score how well a match fits the query    
  */
-export function scoreTournamentMatch(match, query) {
-    const q = query.toLowerCase();
+export function scoreTournamentMatch(match, tokens) {
     let score = 0;
 
-    if (match.tickername?.toLowerCase().includes(q)) score += 5;
-    if (match.shortname?.toLowerCase().includes(q)) score += 4;
-    if (match.tournament?.toLowerCase().includes(q)) score += 3;
-    if (match.series?.toLowerCase().includes(q)) score += 2;
-    if (match.parent?.toLowerCase().includes(q)) score += 1;
+    const fields = [
+        match.tickername,
+        match.shortname,
+        match.tournament,
+        match.series,
+        match.parent,
+    ].filter(Boolean).map(field => field.toLowerCase());
 
-    console.log(`Match: ${match.tournament}, Score for "${query}": ${score}`);
+    for (const token of tokens) {
+        if (fields.some(field => field.includes(token))) {  
+            score += 1;
+        }
+    }
+
+    console.log(`Match "${match.tournament}" scored ${score} for tokens [${tokens.join(', ')}]`);
+
     return score;
 }
 
 /**
  * Filter + rank upcoming matches based on tournament query
  */
-export function filterMatchesByTournament(matches, query) {
-    const normalizedQuery = normalizeTournamentQuery(query);
+export function filterMatchesByTournament(matches, userInput) {
+    const tokens = buildSearchTokens(userInput);
 
     return matches
         .filter(match => new Date(match.date).getTime() > Date.now())
         .map(match => ({
             match,
-            score: scoreTournamentMatch(match, normalizedQuery),
+            score: scoreTournamentMatch(match, tokens),
         }))
         .filter(result => result.score > 0)
         .sort((a, b) => b.score - a.score)
