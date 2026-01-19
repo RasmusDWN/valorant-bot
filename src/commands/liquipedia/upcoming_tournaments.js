@@ -25,7 +25,6 @@ export default {
     try {
       const today = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
       const apiUrl = `https://api.liquipedia.net/api/v3/tournament?wiki=valorant&conditions=%5B%5Bstartdate%3A%3A%3E${today}%5D%5D&groupby=startdate%20ASC`;
-      console.log('apiUrl:', apiUrl);
       const response = await fetch(apiUrl, {
         headers: {
           'accept': 'application/json',
