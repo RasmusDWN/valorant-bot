@@ -29,7 +29,7 @@ export default {
           'authorization': `Apikey ${process.env.LIQUIPEDIA_API_KEY}`
         }
       });
-
+      
       const data = await response.json();
       const now = Date.now();
       const upcomingMatches = data.result.filter(match => new Date(match.date).getTime() > now);
