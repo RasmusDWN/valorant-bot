@@ -4,6 +4,16 @@ import fetch from 'node-fetch';
 import { getCache, setCache } from '../../utils/cache.js';
 import { filterMatchesByTournament } from '../../utils/tournament_search.js';
 
+
+// TODOS:
+// - Paginate if more than 5 matches
+// - Allow filtering by team
+// - Link to Liquipedia match page
+// - Show Tournament Logo
+// - Show Team Logos
+// - Better date formatting
+// - Fix Stream URL extraction
+
 // /upcomingmatches
 //
 // Show upcoming Valorant matches from Liquipedia
