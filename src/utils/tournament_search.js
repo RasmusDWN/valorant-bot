@@ -21,12 +21,12 @@ export function buildSearchTokens(input) {
             aliases.forEach(alias => tokens.add(alias));
         }
     }
-    
+
     return [...tokens];
 }
 
 /**
- * Score how well a match fits the query    
+ * Score how well a match fits the query
  */
 export function scoreTournamentMatch(match, tokens) {
     let score = 0;
@@ -40,7 +40,7 @@ export function scoreTournamentMatch(match, tokens) {
     ].filter(Boolean).map(field => field.toLowerCase());
 
     for (const token of tokens) {
-        if (fields.some(field => field.includes(token))) {  
+        if (fields.some(field => field.includes(token))) {
             score += 1;
         }
     }
