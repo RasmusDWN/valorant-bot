@@ -26,7 +26,7 @@
 
 ### Prerequisites
 
-- Node.js >= 18
+- Node.js >= 20.18.1
 - Discord bot token ([create a bot here](https://discord.com/developers/applications))
 - A server where you can add your bot
 
