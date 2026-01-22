@@ -23,22 +23,38 @@ export default {
             const contracts = (await contractsResponse.json()).data;
             const events = (await eventsResponse.json()).data;
 
-            const now = new Date();
 
-            const contract = contracts.find(c => {
+            const now = new Date();
+            let contract = contracts.find(c => {
                 const event = events.find(ev => ev.uuid === c.content?.relationUuid);
                 if (!event) return false;
                 return now >= new Date(event.startTime) && now <= new Date(event.endTime);
             });
 
+            let event = null;
+            let fallback = false;
             if (!contract) {
-                return interaction.editReply('No active battlepass found.');
+                // Fallback: try to pick the latest contract by startDate if available, else just pick the last contract
+                fallback = true;
+                let contractsWithDate = contracts.filter(c => c.content?.startDate);
+                if (contractsWithDate.length > 0) {
+                    contractsWithDate.sort((a, b) => new Date(b.content.startDate) - new Date(a.content.startDate));
+                    contract = contractsWithDate[0];
+                } else if (contracts.length > 0) {
+                    contract = contracts[contracts.length - 1];
+                }
+            } else {
+                event = events.find(ev => ev.uuid === contract.content?.relationUuid) || null;
+            }
+
+            if (!contract) {
+                return interaction.editReply('No battlepass contract found.');
             }
 
             let chapterIndex = 0;
             let levelIndex = 0;
 
-            const embed = await buildBattlepassEmbed(contract, chapterIndex, levelIndex);
+            const embed = await buildBattlepassEmbed(contract, chapterIndex, levelIndex, event, fallback);
             const components = await buildBattlepassButtons(contract, chapterIndex, levelIndex);
 
             const message = await interaction.editReply({ embeds: [embed], components });
@@ -63,7 +79,16 @@ export default {
                     levelIndex = 0; // Reset level index when changing chapters
                 }
 
-                const newEmbed = await buildBattlepassEmbed(contract, chapterIndex, levelIndex);
+                // Recompute event and fallback for button navigation
+                let navEvent = null;
+                let navFallback = false;
+                if (events.find(ev => ev.uuid === contract.content?.relationUuid)) {
+                    navEvent = events.find(ev => ev.uuid === contract.content?.relationUuid);
+                } else {
+                    navFallback = true;
+                }
+
+                const newEmbed = await buildBattlepassEmbed(contract, chapterIndex, levelIndex, navEvent, navFallback);
                 const newComponents = await buildBattlepassButtons(contract, chapterIndex, levelIndex);
 
                 await i.update({ embeds: [newEmbed], components: newComponents });
@@ -114,7 +139,7 @@ async function buildBattlepassButtons(contract, chapterIndex, levelIndex) {
     return [levelRow, chapterRow];
 }
 
-async function buildBattlepassEmbed(contract, chapterIndex, levelIndex) {
+async function buildBattlepassEmbed(contract, chapterIndex, levelIndex, event = null, fallback = false) {
     const chapters = contract.content?.chapters?.length
         ? contract.content.chapters
         : [{ levels: contract.levels }];
@@ -133,6 +158,12 @@ async function buildBattlepassEmbed(contract, chapterIndex, levelIndex) {
         .setFooter({
             text: `Chapter ${chapterIndex + 1}/${totalChapters} • Page ${levelIndex + 1}/${Math.ceil(chapter.levels.length / LEVELS_PER_PAGE)}`,
         });
+
+    if (event && !fallback) {
+        embed.setDescription(`Battlepass period: <t:${Math.floor(new Date(event.startTime).getTime() / 1000)}:d> to <t:${Math.floor(new Date(event.endTime).getTime() / 1000)}:d>`);
+    } else if (fallback) {
+        embed.setDescription('No active event found for this battlepass. Displaying the latest available contract.');
+    }
 
     for (const lvl of levels) {
         const reward = await fetchReward(lvl.reward?.type, lvl.reward?.uuid);
