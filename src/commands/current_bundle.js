@@ -8,7 +8,7 @@ import { createSkinEmbed } from '../embeds/skin.js';
 
 export default {
     data: new SlashCommandBuilder()
-        .setName('current-bundle')
+        .setName('currentbundle')
         .setDescription('Shows the current bundle from the Valorant store'),
 
     async execute(interaction) {
