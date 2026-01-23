@@ -12,7 +12,9 @@
 - **/battlepass** - Show the latest live battlepass (contract) in Valorant
 - **/bundle [name]** – Show details about a specific skin bundle (skins, price)
 - **/bundles** – List all available skin bundles (with pagination)
+- **/currentbundle** – Show details about the current Valorant skin bundle in the store
 - **/currentevent** – Show details about the current Valorant event
+- **/currentpatchnotes** - Link to latest Valorant patch notes with a brief summary
 - **/currentseason** – Show details about the current Valorant season
 - **/map [name]** – Look up a Valorant map
 - **/newestagent** - Show detailed info about the newest Valorant agent released
