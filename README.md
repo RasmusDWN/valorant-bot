@@ -96,6 +96,7 @@ The bot should log in and register slash commands with your server.
 ```bash
 /src
   /commands   # All Discord slash commands
+    /liquipedia  # Liquipedia-related commands
   /embeds     # Embed templates for certain commands
   /utils      # Helper functions (e.g., tier mapping)
 [index.js](http://_vscodecontentref_/2)      # Bot entry point
