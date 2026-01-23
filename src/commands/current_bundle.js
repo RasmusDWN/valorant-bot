@@ -6,6 +6,8 @@ import { fetchSkinByName } from '../utils/fetch_skin.js';
 import { createBundleEmbed, createBundleButtons } from '../embeds/bundle.js';
 import { createSkinEmbed } from '../embeds/skin.js';
 
+const normalize = str => str.toLowerCase().replace(/[^a-z0-9]/g, ''); // Normalize strings for comparison
+
 export default {
     data: new SlashCommandBuilder()
         .setName('currentbundle')
@@ -15,16 +17,14 @@ export default {
         await interaction.deferReply();
 
         try {
-            // 1️⃣ Fetch ValorantStrike store page
+            // Fetch ValorantStrike store page
             const storeUrl = 'https://valorantstrike.com/valorant-store/';
             const storeRes = await fetch(storeUrl);
             const storeHtml = await storeRes.text();
             const $ = cheerio.load(storeHtml);
             const COLLECTOR_TIMEOUT = 60000; // 60 seconds for button interactions
-            // Create a map of skin names to skin objects
 
-
-            // 2️⃣ Find the first div with class "et_pb_text_inner" that has a <p> inside
+            // Find the first div with class "et_pb_text_inner" that has a <p> inside
             let parentDiv = null;
             $('div.et_pb_text_inner').each((i, el) => {
                 if ($(el).find('p').length > 0) {
@@ -37,7 +37,7 @@ export default {
                 return interaction.editReply('Unable to fetch the current bundle information. Please try again later.');
             }
 
-            // 3️⃣ Get the first <p> inside that div
+            // Get the first <p> inside that div
             const pTag = parentDiv.find('p').first();
             if (!pTag || !pTag.text().trim()) {
                 return interaction.editReply('Unable to fetch the current bundle information. Please try again later.');
@@ -45,65 +45,72 @@ export default {
 
             const bundleName = pTag.text().trim();
 
-            // 4️⃣ Fetch bundles, skins, and content tiers from Valorant API
-            const [bundlesRes, skinsRes, tiersRes] = await Promise.all([
+            // Fetch bundles, skins, and content tiers from Valorant API
+            const [bundlesRes, skinsRes, tiersRes, themesRes] = await Promise.all([
                 fetch('https://valorant-api.com/v1/bundles'),
                 fetch('https://valorant-api.com/v1/weapons/skins'),
-                fetch('https://valorant-api.com/v1/contenttiers')
+                fetch('https://valorant-api.com/v1/contenttiers'),
+                fetch('https://valorant-api.com/v1/themes')
             ]);
 
             const bundleData = (await bundlesRes.json()).data;
             const skinsData = (await skinsRes.json()).data;
             const tiersData = (await tiersRes.json()).data;
+            const themesData = (await themesRes.json()).data;
 
-            // 5️⃣ Map tier UUID to VP price
+            // Map tier UUID to VP price
             const tierPriceMap = {};
             tiersData.forEach(tier => {
                 if (tier.uuid) tierPriceMap[tier.uuid] = tier.price;
             });
 
-            // 6️⃣ Match the bundle name with API
+            // Match the bundle name with API
             const bundle = bundleData.find(b =>
-                bundleName.toLowerCase().includes(b.displayName.toLowerCase()) ||
-                b.displayName.toLowerCase().includes(bundleName.toLowerCase())
+                normalize(bundleName).includes(normalize(b.displayName)) ||
+                normalize(b.displayName).includes(normalize(bundleName))
             );
 
             if (!bundle) {
                 return interaction.editReply(`Unable to match the current bundle with our database. Please try again later.`);
             }
 
-            // 7️⃣ Gather all skins in the bundle using API's content items
-            let skinsInBundle = [];
-            if (bundle.content?.items) {
-                const skinUUIDs = bundle.content.items.map(item => item.uuid).filter(Boolean);
-                skinsInBundle = skinsData
-                    .filter(skin => skinUUIDs.includes(skin.uuid))
-                    .map(skin => ({
-                        ...skin,
-                        price: skin.contentTierUuid ? tierPriceMap[skin.contentTierUuid] : 'N/A'
-                    }));
-            } else {
-                // fallback: match by displayName (rare cases)
-                skinsInBundle = skinsData
-                    .filter(skin => skin.displayName.toLowerCase().includes(bundle.displayName.toLowerCase()))
-                    .map(skin => ({
-                        ...skin,
-                        price: skin.contentTierUuid ? tierPriceMap[skin.contentTierUuid] : 'N/A'
-                    }));
+            const matchedTheme = themesData.find(theme =>
+                normalize(bundle.displayName).includes(normalize(theme.displayName)) ||
+                normalize(theme.displayName).includes(normalize(bundle.displayName))
+            );
+
+            if (!matchedTheme) {
+                console.warn('No matching theme found for bundle:', bundle.displayName);
             }
-                // Create a map of skin names to skin objects for button interactions
-                const skinMap = {};
-                skinsInBundle.forEach(skin => {
+
+            // Gather all skins in the bundle belonging to the matched theme
+            const skinsInBundle = skinsData
+                .filter(skin => skin.themeUuid === matchedTheme.uuid)
+                .map(skin => ({
+                    ...skin,
+                    price: skin.contentTierUuid
+                        ? tierPriceMap[skin.contentTierUuid]
+                        : 'N/A'
+                }))
+                .sort((a, b) => (a.displayName.localeCompare(b.displayName))); // Sort alphabetically
+
+            if (!skinsInBundle.length) {
+                return interaction.editReply(`No skins were found for the current bundle "${bundle.displayName}"`);
+            }
+
+            // Map skin names for button interactions
+            const skinMap = {};
+            skinsInBundle.forEach(skin => {
                 skinMap[skin.displayName.toLowerCase()] = skin;
             });
 
-            // 8️⃣ Send embed + buttons
+            // Send embed + buttons
             const message = await interaction.editReply({
                 embeds: [createBundleEmbed(bundle, skinsInBundle)],
                 components: createBundleButtons(skinsInBundle)
             });
 
-            // 9️⃣ Handle skin button interactions
+            // Handle skin button interactions
             const collector = message.createMessageComponentCollector({ time: COLLECTOR_TIMEOUT });
             collector.on('collect', async i => {
                 try {
