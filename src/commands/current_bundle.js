@@ -22,7 +22,7 @@ export default {
             const $ = cheerio.load(storeHtml);
             const COLLECTOR_TIMEOUT = 60000; // 60 seconds for button interactions
             // Create a map of skin names to skin objects
-        
+
 
             // 2️⃣ Find the first div with class "et_pb_text_inner" that has a <p> inside
             let parentDiv = null;
