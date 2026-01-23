@@ -70,11 +70,12 @@ if (!token) {
 const rest = new REST({ version: '10' }).setToken(token);
 
 let clientId;
+let guildId;
 let route;
 
 if (isDev) {
     clientId = process.env.DEV_CLIENT_ID;
-    const guildId = process.env.GUILD_ID;
+    guildId = process.env.GUILD_ID;
     if (!clientId) {
         console.error('Missing required environment variable: DEV_CLIENT_ID');
         process.exit(1);
@@ -96,20 +97,23 @@ if (isDev) {
 // Deploy commands to a specific guild
 (async () => {
     try {
-        if (!isDev && process.env.GUILD_ID) {
+        if (guildId) {
             console.log('Clearing old guild commands...');
             await rest.put(
-                Routes.applicationGuildCommands(clientId, process.env.GUILD_ID),
-                { body: [] }
+                Routes.applicationGuildCommands(clientId, guildId),
+                { body: commands }
             );
+            console.log('Guild commands registered successfully:', commands.map(cmd => cmd.name));
         }
 
-        console.log('Registering slash commands...');
-        await rest.put(
-            route,
-            { body: commands }
-        );
-        console.log('Slash commands registered successfully.');
+        if (!isDev) {
+            console.log('Registering global commands...');
+            await rest.put(
+                route,
+                { body: commands }
+            );
+            console.log('Slash commands registered successfully.');
+        }
     } catch (error) {
         console.error(error);
     }
