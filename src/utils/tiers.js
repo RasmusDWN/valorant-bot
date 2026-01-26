@@ -6,14 +6,6 @@ const tierNames = {
     "411e4a55-4e59-7757-41f0-86a53f101bb5": "Ultra"
 };
 
-const tierEmotes = {
-    "Select": "<:SelectTier:IDHERE>",
-    "Deluxe": "<:DeluxeTier:IDHERE>",
-    "Premium": "<:PremiumTier:IDHERE>",
-    "Exclusive": "<:ExclusiveTier:IDHERE>",
-    "Ultra": "<:UltraTier:IDHERE>"
-};
-
 const tierPrices = {
     "Select" : "875 VP",
     "Deluxe" : "1275 VP",
@@ -22,11 +14,19 @@ const tierPrices = {
     "Ultra" : "Varies"
 };
 
+const tierEmotes = {
+    "Select": "<:select:1464237592022351932>",
+    "Deluxe": "<:deluxe:1464237687543435297>",
+    "Premium": "<:premium:1464237631079583858>",
+    "Exclusive": "<:exclusive:1464237592022351932>",
+    "Ultra": "<:ultra:1464237480461991988>"
+};
+
 // Fetches names of skin tiers based on their UUIDs.
 export function getTier(uuid) {
     const name = tierNames[uuid] || 'Unknown';
     const emote = name !== 'Unknown' ? (tierEmotes[name] || '') : '';
-
+    console.log('emote', emote);
     return `${name} ${emote}`.trim();
 }
 

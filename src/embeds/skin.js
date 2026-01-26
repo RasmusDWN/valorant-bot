@@ -1,13 +1,13 @@
 import { EmbedBuilder } from 'discord.js';
 
 import { fetchWeaponFromSkin } from '../utils/weapons.js';
-import { getTierName, getTierPrice } from '../utils/tiers.js';
+import { getTier, getTierPrice } from '../utils/tiers.js';
 
 export async function createSkinEmbed(skin) {
     const chromas = skin.chromas?.length || 0;
     const price = getTierPrice(skin.contentTierUuid);
     const tier = skin.contentTierUuid
-        ? getTierName(skin.contentTierUuid)
+        ? getTier(skin.contentTierUuid)
         : 'Unknown';
     const weapon = await fetchWeaponFromSkin(skin);
     const skinName = skin.displayName;
