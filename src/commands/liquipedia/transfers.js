@@ -46,9 +46,9 @@ export default {
         .setFooter({ text: 'Data source: Liquipedia', iconURL: 'https://liquipedia.net/commons/images/2/2c/Liquipedia_logo.png' });
 
       for (const transfer of transfers) {
-        const playerName = transfer.player || 'Unknown';
-        const fromTeam = transfer.fromteam || 'N/A';
-        const toTeam = transfer.toteam || 'N/A';
+        const playerName = transfer.player;
+        const fromTeam = transfer.fromteam;
+        const toTeam = transfer.toteam;
         const date = transfer.date ? new Date(transfer.date).toLocaleDateString('en-GB') : 'Unknown';
         const role = transfer.role || '';
 
