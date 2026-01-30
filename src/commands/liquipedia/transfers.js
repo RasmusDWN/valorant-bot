@@ -41,6 +41,7 @@ export default {
 
       const embed = new EmbedBuilder()
         .setTitle('Latest Valorant Transfers')
+        .setDescription('[View on Liquipedia](https://liquipedia.net/valorant/Portal:Transfers)')
         .setColor(globalThis.VALORANT_RED)
         .setFooter({ text: 'Data source: Liquipedia', iconURL: 'https://liquipedia.net/commons/images/2/2c/Liquipedia_logo.png' });
 
