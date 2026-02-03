@@ -26,7 +26,7 @@ const tierEmotes = {
 export function getTier(uuid) {
     const name = tierNames[uuid] || 'Unknown';
     const emote = name !== 'Unknown' ? (tierEmotes[name] || '') : '';
-    console.log('emote', emote);
+
     return `${name} ${emote}`.trim();
 }
 
