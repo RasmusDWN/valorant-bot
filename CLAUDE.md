@@ -16,7 +16,7 @@ Set `NODE_ENV=development` to use dev bot token and register commands to a singl
 - `DISCORD_TOKEN` / `DEV_DISCORD_TOKEN` - Bot tokens for production/development
 - `CLIENT_ID` / `DEV_CLIENT_ID` - Discord application client IDs
 - `GUILD_ID` - Required for dev mode; also used to clear guild commands in production
-- `LIQUIPEDIA_API_KEY` - Required for `/player`, `/team`, `/upcoming_matches`, `/upcoming_tournaments` commands
+- `LIQUIPEDIA_API_KEY` - Required for `/player`, `/team`, `/upcoming_matches`, `/upcoming_tournaments`, `/team_standings` commands
 
 ## Architecture
 
