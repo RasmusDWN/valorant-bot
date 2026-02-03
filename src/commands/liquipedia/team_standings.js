@@ -41,6 +41,11 @@ export default {
       // Fetch recent matches for this team
       const matches = await fetchTeamMatches(team.pagename, team.name);
 
+      if (matches && matches.apiError) {
+        await interaction.editReply('Liquipedia API is currently experiencing issues (500 Internal Server Error). Please try again later.');
+        return;
+      }
+
       if (!matches || matches.length === 0) {
         await interaction.editReply(`No recent tournament matches found for "${team.name}".`);
         return;
@@ -124,13 +129,27 @@ async function fetchTeamMatches(teamPagename, teamName) {
   // Unfinished matches often have placeholders like "#6 Seed"
   const conditions = encodeURIComponent(`[[date::>${dateStr}]] AND [[finished::1]]`);
 
-  const response = await fetch(`https://api.liquipedia.net/api/v3/match?wiki=valorant&conditions=${conditions}&limit=500&order=date%20DESC`, {
-    headers: {
-      'accept': 'application/json',
-      'authorization': `Apikey ${process.env.LIQUIPEDIA_API_KEY}`
+  let data;
+  let response;
+  try {
+    response = await fetch(`https://api.liquipedia.net/api/v3/match?wiki=valorant&conditions=${conditions}&limit=500&order=date%20DESC`, {
+      headers: {
+        'accept': 'application/json',
+        'authorization': `Apikey ${process.env.LIQUIPEDIA_API_KEY}`
+      }
+    });
+    if (!response.ok) {
+      console.error(`Liquipedia API error: ${response.status} ${response.statusText}`);
+      if (response.status === 500) {
+        return { apiError: true };
+      }
+      return null;
     }
-  });
-  const data = await response.json();
+    data = await response.json();
+  } catch (err) {
+    console.error('Error fetching or parsing Liquipedia match data:', err);
+    return null;
+  }
 
   if (!data || !data.result) {
     return null;
@@ -243,15 +262,18 @@ function groupMatchesByTournament(matches, teamPagename, teamName) {
     let teamWon = false;
 
     if (match.winner !== undefined && match.winner !== null) {
-      if (isTeam1 && (match.winner === 1 || match.winner === '1')) teamWon = true;
-      if (isTeam2 && (match.winner === 2 || match.winner === '2')) teamWon = true;
+      if ((isTeam1 && (match.winner === 1 || match.winner === '1')) ||
+          (!isTeam1 && (match.winner === 2 || match.winner === '2'))) {
+        teamWon = true;
+      } else {
+        teamWon = false;
+      }
     } else {
-      // Compare scores from match2opponents
+      // Fallback to score comparison
       const score1 = parseInt(team1?.score) || 0;
       const score2 = parseInt(team2?.score) || 0;
-
-      if (isTeam1 && score1 > score2) teamWon = true;
-      if (isTeam2 && score2 > score1) teamWon = true;
+      if (score1 > score2) teamWon = true;
+      else if (score2 > score1) teamWon = true;
     }
 
     if (teamWon) {
