@@ -18,7 +18,7 @@ const tierEmotes = {
     "Select": "<:select:1464237592022351932>",
     "Deluxe": "<:deluxe:1464237687543435297>",
     "Premium": "<:premium:1464237631079583858>",
-    "Exclusive": "<:exclusive:1464237592022351932>",
+    "Exclusive": "<:exclusive:1464237651484737566>",
     "Ultra": "<:ultra:1464237480461991988>"
 };
 
