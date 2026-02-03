@@ -202,17 +202,11 @@ function groupMatchesByTournament(matches, teamPagename, teamName) {
       tournaments[tournamentName] = {
         name: tournamentName,
         matches: [],
-        latestDate: null,
-        hasUpcoming: false
+        latestDate: null
       };
     }
 
     const matchDate = match.date ? new Date(match.date) : null;
-
-    // Track if tournament has upcoming matches
-    if (matchDate && matchDate > now) {
-      tournaments[tournamentName].hasUpcoming = true;
-    }
 
     // Track the latest match date for this tournament
     if (matchDate && (!tournaments[tournamentName].latestDate || matchDate > tournaments[tournamentName].latestDate)) {
