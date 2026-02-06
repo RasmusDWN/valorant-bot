@@ -17,7 +17,7 @@ export function buildSearchTokens(input) {
     const tokens = new Set([query]);
 
     for (const aliases of Object.values(TOURNAMENT_ALIASES)) {
-        if (aliases.some(alias => query.includes(alias))) {
+        if (aliases.some(alias => query === alias)) {
             aliases.forEach(alias => tokens.add(alias));
         }
     }
@@ -30,7 +30,6 @@ export function buildSearchTokens(input) {
  */
 export function scoreTournamentMatch(match, tokens) {
     let score = 0;
-
     const fields = [
         match.tickername,
         match.shortname,
@@ -39,14 +38,25 @@ export function scoreTournamentMatch(match, tokens) {
         match.parent,
     ].filter(Boolean).map(field => field.toLowerCase());
 
+    // Prioritize exact matches
     for (const token of tokens) {
-        if (fields.some(field => field.includes(token))) {
-            score += 1;
+        if (fields.some(field => field === token)) {
+            score += 10; // Higher weight for exact match
+        }
+    }
+
+    // If no exact match, check for partial matches (word boundary only)
+    if (score === 0) {
+        for (const token of tokens) {
+            // Only match as a whole word, not substring
+            const wordRegex = new RegExp(`\\b${token}\\b`, 'i');
+            if (fields.some(field => wordRegex.test(field))) {
+                score += 1;
+            }
         }
     }
 
     console.log(`Match "${match.tournament}" scored ${score} for tokens [${tokens.join(', ')}]`);
-
     return score;
 }
 
