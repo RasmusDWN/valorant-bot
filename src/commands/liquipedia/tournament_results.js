@@ -3,6 +3,7 @@ import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import fetch from 'node-fetch';
 
 import { filterPastMatchesByTournament } from '../../utils/tournament_search.js';
+import { buildTournamentResults } from '../../utils/team_standings.js';
 import { getCache, setCache } from '../../utils/cache.js';
 
 // /tournament-results {tournament-name}
@@ -58,24 +59,16 @@ export default {
         return;
       }
 
-      // Build embed
+      // Build embed with formatted results
       const embed = new EmbedBuilder()
         .setTitle(`Recent Results - ${tournamentName}`)
         .setColor(globalThis.VALORANT_RED)
         .setFooter({ text: 'Data source: Liquipedia', iconURL: 'https://liquipedia.net/commons/images/2/2c/Liquipedia_logo.png' });
 
-      // Add up to 5 recent results
-      const results = filtered.slice(0, 5).map(match => {
-        const team1 = match.match2opponents?.[0]?.name || 'TBD';
-        const team2 = match.match2opponents?.[1]?.name || 'TBD';
-        const score1 = match.match2opponents?.[0]?.score ?? '?';
-        const score2 = match.match2opponents?.[1]?.score ?? '?';
-        const date = match.date ? new Date(match.date).toLocaleDateString() : 'Unknown';
-        return `**${team1}** ${score1} - ${score2} **${team2}** (${date})`;
-      });
+      const resultsString = buildTournamentResults(filtered);
       embed.setDescription(
         `[View on Liquipedia](https://liquipedia.net/valorant/S-Tier_Tournaments)\n\n` +
-        results.join('\n')
+        (resultsString || 'No results found.')
       );
 
       const replyPayload = { embeds: [embed] };
