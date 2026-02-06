@@ -247,3 +247,60 @@ export function buildRecentResults(matches, teamName) {
 
   return results.join('\n');
 }
+
+// Build tournament results string for past matches (for /tournament-results)
+export function buildTournamentResults(matches) {
+  if (!matches || matches.length === 0) return null;
+
+  // Sort by date descending and take up to 5
+  const sortedMatches = [...matches]
+    .filter(m => {
+      if (!m.match2opponents || m.match2opponents.length < 2) return false;
+      return m.finished === '1' || m.finished === 1 || m.winner;
+    })
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 5);
+
+  if (sortedMatches.length === 0) return null;
+
+
+  const results = sortedMatches.map(match => {
+    const team1 = match.match2opponents[0];
+    const team2 = match.match2opponents[1];
+    const team1Name = team1?.name || 'TBD';
+    const team2Name = team2?.name || 'TBD';
+    const team1Score = team1?.score ?? '?';
+    const team2Score = team2?.score ?? '?';
+    const date = match.date ? new Date(match.date).toLocaleDateString() : 'Unknown';
+
+    // Determine winner and loser for emoji
+    let team1Emoji = '';
+    let team2Emoji = '';
+    if (match.winner !== undefined && match.winner !== null) {
+      if (match.winner === 1 || match.winner === '1') {
+        team1Emoji = '✅';
+        team2Emoji = '❌';
+      } else if (match.winner === 2 || match.winner === '2') {
+        team1Emoji = '❌';
+        team2Emoji = '✅';
+      }
+    } else {
+      // Fallback to score comparison
+      const score1 = parseInt(team1Score) || 0;
+      const score2 = parseInt(team2Score) || 0;
+      if (score1 > score2) {
+        team1Emoji = '✅';
+        team2Emoji = '❌';
+      } else if (score2 > score1) {
+        team1Emoji = '❌';
+        team2Emoji = '✅';
+      } else {
+        team1Emoji = team2Emoji = '🔸';
+      }
+    }
+
+    return `${team1Emoji} **${team1Name}** ${team1Score} - ${team2Score} **${team2Name}** ${team2Emoji} (${date})`;
+  });
+
+  return results.join('\n');
+}
