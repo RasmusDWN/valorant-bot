@@ -59,9 +59,19 @@ export default {
         return;
       }
 
+      const tournamentMatch = filtered[0];
+      const tournamentObj = {
+        name: tournamentMatch.tournament,
+        logo: tournamentMatch.icondarkurl || tournamentMatch.iconurl
+      };
+
+      console.log('tournamentMatch', tournamentMatch);
+      console.log('tournament', tournamentObj);
+
       // Build embed with formatted results
       const embed = new EmbedBuilder()
         .setTitle(`Recent Results - ${tournamentName}`)
+        .setThumbnail(tournamentObj.logo)
         .setColor(globalThis.VALORANT_RED)
         .setFooter({ text: 'Data source: Liquipedia', iconURL: 'https://liquipedia.net/commons/images/2/2c/Liquipedia_logo.png' });
 
