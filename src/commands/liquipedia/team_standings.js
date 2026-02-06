@@ -171,7 +171,6 @@ function groupMatchesByTournament(matches, teamName) {
 
   // Group matches by tournament
   const tournaments = {};
-  const now = new Date();
 
   for (const match of matches) {
     // Skip matches without valid opponents
