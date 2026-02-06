@@ -3,13 +3,12 @@ import fetch from 'node-fetch';
 
 import { getCache, setCache } from '../../utils/cache.js';
 
-// /team_standings #{team-name}
+// /team-standings #{team-name}
 //
 // Look up a Valorant team's wins and losses in their current or most recent tournament
-
 export default {
   data: new SlashCommandBuilder()
-    .setName('team_standings')
+    .setName('team-standings')
     .setDescription('Look up a team\'s wins and losses in their current or most recent tournament')
     .addStringOption(option =>
       option.setName('team')
@@ -39,20 +38,19 @@ export default {
       }
 
       // Fetch recent matches for this team
-      const matches = await fetchTeamMatches(team.pagename, team.name);
+      const matches = await fetchTeamMatches(team.name);
+      if (!matches || matches.length === 0) {
+        await interaction.editReply(`No recent tournament matches found for "${team.name}".`);
+        return;
+      }
 
       if (matches && matches.apiError) {
         await interaction.editReply('Liquipedia API is currently experiencing issues (500 Internal Server Error). Please try again later.');
         return;
       }
 
-      if (!matches || matches.length === 0) {
-        await interaction.editReply(`No recent tournament matches found for "${team.name}".`);
-        return;
-      }
-
       // Group matches by tournament and find the most recent one
-      const tournamentData = groupMatchesByTournament(matches, team.pagename, team.name);
+      const tournamentData = groupMatchesByTournament(matches, team.name);
 
       if (!tournamentData) {
         await interaction.editReply(`No tournament data found for "${team.name}".`);
@@ -80,7 +78,7 @@ export default {
       );
 
       // Add recent match results (up to 5)
-      const recentResults = buildRecentResults(tournamentMatches, team.pagename, team.name);
+      const recentResults = buildRecentResults(tournamentMatches, team.name);
       if (recentResults) {
         embed.addFields({ name: 'Recent Results', value: recentResults, inline: false });
       }
@@ -120,19 +118,20 @@ async function fetchTeam(teamName) {
 }
 
 // Fetch recent matches for a team (last 3 months)
-async function fetchTeamMatches(teamPagename, teamName) {
+async function fetchTeamMatches(teamName) {
   const threeMonthsAgo = new Date();
   threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
   const dateStr = threeMonthsAgo.toISOString().split('T')[0];
 
-  // Fetch only FINISHED matches - these have resolved team names
-  // Unfinished matches often have placeholders like "#6 Seed"
-  const conditions = encodeURIComponent(`[[date::>${dateStr}]] AND [[finished::1]]`);
+  // Add team-specific condition to API query
+  // Try opponent first, fallback to name if needed
+  const teamCondition = `[[opponent::${teamName}]]`;
+  const conditions = encodeURIComponent(`[[date::>${dateStr}]] AND [[finished::1]] AND ${teamCondition}`);
 
   let data;
   let response;
   try {
-    response = await fetch(`https://api.liquipedia.net/api/v3/match?wiki=valorant&conditions=${conditions}&limit=500&order=date%20DESC`, {
+    response = await fetch(`https://api.liquipedia.net/api/v3/match?wiki=valorant&conditions=${conditions}&limit=50&order=date%20DESC`, {
       headers: {
         'accept': 'application/json',
         'authorization': `Apikey ${process.env.LIQUIPEDIA_API_KEY}`
@@ -155,32 +154,19 @@ async function fetchTeamMatches(teamPagename, teamName) {
     return null;
   }
 
-  // Filter matches to only include those with the team (exact match)
-  const teamMatches = data.result.filter(match => {
-    if (!match.match2opponents || match.match2opponents.length < 2) return false;
-
-    const team1Name = match.match2opponents[0]?.name?.toLowerCase() || '';
-    const team2Name = match.match2opponents[1]?.name?.toLowerCase() || '';
-    const searchName = teamName.toLowerCase();
-    const searchPagename = teamPagename.toLowerCase();
-
-    // Use exact matching to avoid false positives
-    return team1Name === searchName || team2Name === searchName ||
-           team1Name === searchPagename || team2Name === searchPagename;
-  });
-
-  return teamMatches;
+  // No need to filter locally, API should return only relevant matches
+  return data.result;
 }
 
 // Group matches by tournament and determine wins/losses
-function groupMatchesByTournament(matches, teamPagename, teamName) {
+function groupMatchesByTournament(matches, teamName) {
   if (!matches || matches.length === 0) return null;
 
   // Helper to check if a team name matches
   const isTeamMatch = (name) => {
     if (!name) return false;
     const lowerName = name.toLowerCase();
-    return lowerName === teamPagename.toLowerCase() || lowerName === teamName.toLowerCase();
+    return lowerName === teamName.toLowerCase();
   };
 
   // Group matches by tournament
@@ -309,14 +295,14 @@ function formatTournamentName(pagename) {
 }
 
 // Build recent results string
-function buildRecentResults(matches, teamPagename, teamName) {
+function buildRecentResults(matches, teamName) {
   if (!matches || matches.length === 0) return null;
 
   // Helper to check if a team name matches
   const isTeamMatch = (name) => {
     if (!name) return false;
     const lowerName = name.toLowerCase();
-    return lowerName === teamPagename.toLowerCase() || lowerName === teamName.toLowerCase();
+    return lowerName === teamName.toLowerCase();
   };
 
   // Sort by date descending and take up to 5
