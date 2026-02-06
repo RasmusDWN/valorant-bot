@@ -66,3 +66,20 @@ export function filterMatchesByTournament(matches, userInput) {
         .sort((a, b) => b.score - a.score)
         .map(result => result.match);
 }
+
+/**
+ * Filter + rank past matches based on tournament query
+ */
+export function filterPastMatchesByTournament(matches, userInput) {
+    const tokens = buildSearchTokens(userInput);
+
+    return matches
+        .filter(match => new Date(match.date).getTime() <= Date.now())
+        .map(match => ({
+            match,
+            score: scoreTournamentMatch(match, tokens),
+        }))
+        .filter(result => result.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .map(result => result.match);
+}
